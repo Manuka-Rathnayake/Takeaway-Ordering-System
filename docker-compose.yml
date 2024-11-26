@@ -1,0 +1,33 @@
+services:
+  express-server:
+    image: node:18-alpine
+    restart: always
+    volumes:
+      - ./tos-backend:/usr/src/app
+    ports:
+      - "6300:6300"
+    command: sh -c "chmod +x /usr/src/app/startup.sh && /usr/src/app/startup.sh"
+
+  react-server:
+    image: node:18-alpine
+    restart: always
+    volumes:
+      - ./tos-frontend:/usr/src/app
+    ports:
+      - "5173:5173"
+    command: sh -c "chmod +x /usr/src/app/startup.sh && /usr/src/app/startup.sh"
+
+  mongo-express:
+    image: mongo:8.0
+    restart: always
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+        MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongodata:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongodata:
+

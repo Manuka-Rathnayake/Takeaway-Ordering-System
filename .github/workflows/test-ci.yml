@@ -1,0 +1,70 @@
+name: test-ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    name: Backend Tests
+
+    steps:
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js for backend
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      # Install backend dependencies
+      - name: Install backend dependencies
+        working-directory: ./tos-backend
+        run: npm install
+
+      # Run backend tests
+      - name: Run backend tests
+        working-directory: ./tos-backend
+        run: npm test
+
+      # Build backend
+      - name: Build backend
+        working-directory: ./tos-backend
+        run: npm run build
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    name: Frontend Tests
+
+    steps:
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js for frontend
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      # Install frontend dependencies
+      - name: Install frontend dependencies
+        working-directory: ./tos-frontend
+        run: npm install
+
+      # Run frontend tests
+      # - name: Run frontend tests
+      #   working-directory: ./frontend
+      #   run: npm test
+
+      # Build frontend
+      - name: Build frontend
+        working-directory: ./tos-frontend
+        run: npm run build
