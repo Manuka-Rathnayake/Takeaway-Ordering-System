@@ -1,0 +1,6 @@
+{
+  "cashier": ["user", "admin"],
+  "kitchen": ["chef"],
+  "admin": ["admin"],
+  "menu": ["user", "admin"]
+}
