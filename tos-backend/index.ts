@@ -18,11 +18,14 @@ const server = http.createServer(app)
 const wss = new WebSocket.Server({ noServer: true })
 const port = process.env.PORT || 6300;
 
+// middleware
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(cookieParser())
 // app.use(authMiddleware)
 
+
+// WebSoket Upgrade
 server.on('upgrade', (request: IncomingMessage, socket, head) => {
   const user = wsAuth(request);
   console.log("hi mf")

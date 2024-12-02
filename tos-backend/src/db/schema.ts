@@ -26,6 +26,7 @@ export const Users = model("users", userSchema);
 
 export interface IUnitData {
   unit: Types.Decimal128,
+  warningLevel: Types.Decimal128,
   unitSymbol: string,
 }
 
@@ -40,6 +41,7 @@ const ingredientsSchema = new Schema<IIngredient>({
   updatedate: { type: Date, required: true },
   stockLevel: {
     unit: { type: Types.Decimal128, required: true },
+    warningLevel: { type: Types.Decimal128, required: true },
     unitSymbol: { type: String, required: true }
   }
 },
