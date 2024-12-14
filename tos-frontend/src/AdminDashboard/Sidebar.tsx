@@ -9,6 +9,8 @@ import {
   FaSearch,
   FaBell,
   FaCog,
+  FaBars,
+  FaTimes
 } from 'react-icons/fa';
 import axios from 'axios';
 import { create } from 'zustand';
@@ -36,6 +38,7 @@ const useNavigationStore = create<NavigationState>((set) => ({
 const AdminLayout: React.FC = () => {
   const { activeItem, setActiveItem, notifications, setNotifications } = useNavigationStore();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
 
   const navItems: NavigationItem[] = [
@@ -78,12 +81,40 @@ const AdminLayout: React.FC = () => {
     fetchNotifications();
   }, [setNotifications]);
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
     <div className="flex h-screen">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 h-full bg-white border-r border-gray-200">
-        <div className="p-6">
+      <div 
+        className={`
+          fixed md:static z-50 top-0 left-0 w-64 h-full 
+          bg-white border-r border-gray-200 
+          transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0
+        `}
+      >
+        <div className="p-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Logo</h1>
+          
+          {/* Mobile Close Button */}
+          <button 
+            className="md:hidden"
+            onClick={toggleSidebar}
+          >
+            <FaTimes className="w-6 h-6" />
+          </button>
         </div>
 
         <nav className="mt-6">
@@ -96,7 +127,10 @@ const AdminLayout: React.FC = () => {
                   ? 'bg-red-50 text-red-500'
                   : 'text-gray-600 hover:text-red-500 hover:bg-red-100'
               }`}
-              onClick={() => setActiveItem(item.name)}
+              onClick={() => {
+                setActiveItem(item.name);
+                setIsSidebarOpen(false); // Close sidebar on mobile after selection
+              }}
             >
               <item.icon className="w-5 h-5" />
               <span className="ml-3">{item.name}</span>
@@ -128,6 +162,14 @@ const AdminLayout: React.FC = () => {
       <div className="flex-1 flex flex-col bg-gray-100">
         {/* Navbar */}
         <div className="flex items-center justify-between p-4 bg-white shadow-md">
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden mr-4"
+            onClick={toggleSidebar}
+          >
+            <FaBars className="w-6 h-6" />
+          </button>
+
           {/* Search Bar */}
           <div className="flex items-center w-1/3 relative">
             <FaSearch className="absolute left-3 text-gray-500" />
