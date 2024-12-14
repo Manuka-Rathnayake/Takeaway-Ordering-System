@@ -10,6 +10,10 @@ import { WebSocket } from 'ws';
 import { WSclient } from './src/utils/wsutil';
 import { payload, wsAuth } from './src/utils/roleauth';
 import { wsEventHandler, WSPayload } from './src/routes/ws';
+import ingredientsRoute from './src/routes/ingredients';
+import menuItemRoute from './src/routes/menuItem';
+import orderRoute from './src/routes/order';
+import stockUpdateRoute from './src/routes/stockUpdate';
 
 dotenv.config();
 connectDB();
@@ -54,6 +58,11 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage, user: payload) => {
 
 /* routers */
 app.use('/auth', authRoute)
+app.use('/ingredients', ingredientsRoute)
+app.use('/menuitems', menuItemRoute)
+app.use('/orders', orderRoute)
+app.use('/stockupdate', stockUpdateRoute)
+
 app.get('/ping', authMiddleware("admin"), (req: Request, res: Response) => {
   return res.status(200).json({ health: 1 })
 });

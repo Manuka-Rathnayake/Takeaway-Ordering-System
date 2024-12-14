@@ -32,13 +32,11 @@ export interface IUnitData {
 
 export interface IIngredient extends Document {
   name: string,
-  updatedate: Date,
   stockLevel: IUnitData,
 }
 
 const ingredientsSchema = new Schema<IIngredient>({
   name: { type: String, required: true },
-  updatedate: { type: Date, required: true },
   stockLevel: {
     unit: { type: Types.Decimal128, required: true },
     warningLevel: { type: Types.Decimal128, required: true },
@@ -46,23 +44,26 @@ const ingredientsSchema = new Schema<IIngredient>({
   }
 },
   {
-    timestamps: true
+    timestamps: true,
+    optimisticConcurrency: true
   });
 
 export const Ingredient = model("ingredients", ingredientsSchema);
 
+export interface IUnitDataMenu {
+  unit: Types.Decimal128,
+  unitSymbol: string,
+}
 
 export interface IMenuIngredients {
   id: Types.ObjectId,
-  name: string,
-  updatedate: Date,
-  stockLevel: IUnitData,
+  stockLevel: IUnitDataMenu,
 }
 
 // Menu Item Interface and Schema
 export interface IMenuItem extends Document {
   name: string,
-  createdate: Date,
+  des: string,
   price: Types.Decimal128,
   ingredients: IMenuIngredients[],
 }
@@ -74,10 +75,8 @@ const menuItemSchema = new Schema<IMenuItem>({
     trim: true,
     unique: true
   },
-  createdate: {
-    type: Date,
-    required: true,
-    default: Date.now
+  des: {
+    type: String,
   },
   price: {
     type: Types.Decimal128,
@@ -88,15 +87,6 @@ const menuItemSchema = new Schema<IMenuItem>({
     id: {
       type: Types.ObjectId,
       ref: 'ingredients',
-      required: true
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    updatedate: {
-      type: Date,
       required: true
     },
     stockLevel: {
@@ -117,36 +107,22 @@ const menuItemSchema = new Schema<IMenuItem>({
 
 export const MenuItem = model<IMenuItem>("menuitems", menuItemSchema);
 
-// export interface IOrderMenuItem {
-//   id: Types.ObjectId,
-//   name: string,
-//   price: Types.Decimal128,
-// }
-//
-// export interface IOrder {
-//   createdate: Date,
-//   customerNumber: string,
-//   customeName: string,
-//   status: string,
-//   statusKitchen: string,
-//   addUser: string,
-//   price: Types.Decimal128,
-//   totalPrice: Types.Decimal128,
-//   discount: Types.Decimal128,
-//   menuItem: IOrderMenuItem[],
-// }
-// Order MenuItem Interface
 export interface IOrderMenuItem {
   id: Types.ObjectId,
-  name: string,
-  price: Types.Decimal128,
+  quantity: number
+}
+
+export interface IPayment {
+  isPaid: boolean,
+  paymentMethod: string,
+  time: Date
+  user: Types.ObjectId
 }
 
 // Order Interface and Schema
 export interface IOrder extends Document {
-  createdate: Date,
   customerNumber: string,
-  customeName: string,
+  customerName: string,
   status: string,
   statusKitchen: string,
   addUser: string,
@@ -154,20 +130,16 @@ export interface IOrder extends Document {
   totalPrice: Types.Decimal128,
   discount: Types.Decimal128,
   menuItem: IOrderMenuItem[],
+  payment: IPayment
 }
 
 const orderSchema = new Schema<IOrder>({
-  createdate: {
-    type: Date,
-    required: true,
-    default: Date.now
-  },
   customerNumber: {
     type: String,
     required: true,
     trim: true
   },
-  customeName: {
+  customerName: {
     type: String,
     required: true,
     trim: true
@@ -210,19 +182,67 @@ const orderSchema = new Schema<IOrder>({
       ref: 'menuitems',
       required: true
     },
-    name: {
-      type: String,
+    quantity: {
+      type: Number,
       required: true,
-      trim: true
-    },
-    price: {
-      type: Types.Decimal128,
-      required: true,
-      min: [0, 'Price cannot be negative']
+      min: [0, 'quantity can not be zero'],
+      default: 1
     }
-  }]
+  }],
+  payment: {
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
+    paymentMethod: {
+      type: String
+    },
+    time: {
+      type: Date
+    },
+    user: {
+      type: Types.ObjectId,
+      ref: 'users'
+    }
+  }
+
 }, {
   timestamps: true
 });
 
 export const Order = model<IOrder>("orders", orderSchema);
+
+
+export interface IstockUpdate extends Document {
+  ingredientId: Types.ObjectId,
+  productBrand: string,
+  stockedUnit: IUnitDataMenu
+}
+
+const stockUpdateSchema = new Schema<IstockUpdate>({
+  ingredientId: {
+    type: Schema.Types.ObjectId,
+    ref: 'ingredients',
+    required: true
+  },
+  productBrand: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  stockedUnit: {
+    unit: {
+      type: Types.Decimal128,
+      required: true
+    },
+    unitSymbol: {
+      type: String,
+      required: true,
+      trim: true
+    }
+  }
+}, {
+  timestamps: true
+});
+
+export const StockUpdate = model<IstockUpdate>("stockupdates", stockUpdateSchema);
