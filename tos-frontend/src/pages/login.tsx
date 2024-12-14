@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
+import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'react-router-dom'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -21,6 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+// Define login credentials (replace with actual authentication)
+const LOGIN_CREDENTIALS = {
+  admin: { email: 'admin@example.com', password: 'admin123' },
+  kitchen: { email: 'kitchen@example.com', password: 'kitchen123' },
+  cashier: { email: 'cashier@example.com', password: 'cashier123' },
+  menu: { email: 'menu@example.com', password: 'menu123' }
+}
+
 const formSchema = z.object({
   type: z.enum(["kitchen", "menu", "admin", "cashier"], {
     required_error: "Please select a login type.",
@@ -33,8 +42,10 @@ const formSchema = z.object({
   }),
 })
 
-export default function MainLogin() {
+// Main Login Component
+export function MainLogin() {
   const [serverError, setServerError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,10 +57,27 @@ export default function MainLogin() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Simulate API call
-    if (values.email === "test@example.com" && values.password === "password123") {
-      // Successful login
-      console.log("Login successful", values)
+    const { type, email, password } = values
+    
+    // Check credentials based on user type
+    const validCredentials = LOGIN_CREDENTIALS[type]
+    
+    if (email === validCredentials.email && password === validCredentials.password) {
+      // Successful login - navigate to corresponding dashboard
+      switch(type) {
+        case 'admin':
+          navigate('/admin')
+          break
+        case 'kitchen':
+          navigate('/kitchen')
+          break
+        case 'cashier':
+          navigate('/cashier')
+          break
+        case 'menu':
+          navigate('/menu')
+          break
+      }
       setServerError(null)
     } else {
       // Invalid credentials
