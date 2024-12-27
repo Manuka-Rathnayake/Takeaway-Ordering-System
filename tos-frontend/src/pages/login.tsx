@@ -21,14 +21,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import api from '@/utils/axios'
 
 // Define login credentials (replace with actual authentication)
-const LOGIN_CREDENTIALS = {
-  admin: { email: 'admin@example.com', password: 'admin123' },
-  kitchen: { email: 'kitchen@example.com', password: 'kitchen123' },
-  cashier: { email: 'cashier@example.com', password: 'cashier123' },
-  menu: { email: 'menu@example.com', password: 'menu123' }
-}
+// const LOGIN_CREDENTIALS = {
+//   admin: { email: 'admin@example.com', password: 'admin123' },
+//   kitchen: { email: 'kitchen@example.com', password: 'kitchen123' },
+//   cashier: { email: 'cashier@example.com', password: 'cashier123' },
+//   menu: { email: 'menu@example.com', password: 'menu123' }
+// }
 
 const formSchema = z.object({
   type: z.enum(["kitchen", "menu", "admin", "cashier"], {
@@ -37,10 +38,12 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  password: z.string().min(8, {
+  password: z.string().min(4, {
     message: "Password must be at least 8 characters long.",
   }),
 })
+
+
 
 // Main Login Component
 export function MainLogin() {
@@ -58,31 +61,70 @@ export function MainLogin() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const { type, email, password } = values
-    
-    // Check credentials based on user type
-    const validCredentials = LOGIN_CREDENTIALS[type]
-    
-    if (email === validCredentials.email && password === validCredentials.password) {
-      // Successful login - navigate to corresponding dashboard
-      switch(type) {
-        case 'admin':
-          navigate('/admin')
-          break
-        case 'kitchen':
-          navigate('/kitchen')
-          break
-        case 'cashier':
-          navigate('/cashier')
-          break
-        case 'menu':
-          navigate('/menu')
-          break
+
+    const loginhandle = async () => {
+      try {
+        const res = await api.post('auth/login', {
+          'section': type,
+          'email': email,
+          'password': password
+        });
+
+        console.log(res)
+
+        if (res.status == 400) {
+          setServerError("Invalid Password !")
+        } else if (res.status == 404) {
+          setServerError("Email is Not Registered !")
+        }
+
+        switch (type) {
+          case 'admin':
+            navigate('/admin')
+            break
+          case 'kitchen':
+            navigate('/kitchen')
+            break
+          case 'cashier':
+            navigate('/cashier')
+            break
+          case 'menu':
+            navigate('/menu')
+            break
+        }
+
+      } catch (error) {
+        setServerError("Server Error code: 500");
+        console.log(error)
       }
-      setServerError(null)
-    } else {
-      // Invalid credentials
-      setServerError("Invalid email or password. Please try again.")
+
     }
+
+    loginhandle();
+    // Check credentials based on user type
+    // const validCredentials = LOGIN_CREDENTIALS[type]
+    //
+    // if (email === validCredentials.email && password === validCredentials.password) {
+    //   // Successful login - navigate to corresponding dashboard
+    //   switch(type) {
+    //     case 'admin':
+    //       navigate('/admin')
+    //       break
+    //     case 'kitchen':
+    //       navigate('/kitchen')
+    //       break
+    //     case 'cashier':
+    //       navigate('/cashier')
+    //       break
+    //     case 'menu':
+    //       navigate('/menu')
+    //       break
+    //   }
+    //   setServerError(null)
+    // } else {
+    //   // Invalid credentials
+    //   setServerError("Invalid email or password. Please try again.")
+    // }
   }
 
   return (

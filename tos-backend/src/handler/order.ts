@@ -5,7 +5,13 @@ import { getOrdersByStatus } from "./dbhandler";
 
 export const getAllOrders = async (req: Request, res: Response) => {
   try {
-    const orders = await Order.find().populate('menuItem.id');
+    const orders = await Order.find().populate({
+      path: "menuItem.id",
+      populate: {
+        path: "ingredients.id",
+        model: "ingredients"
+      }
+    }).exec();
     return res.status(200).json({ data: orders });
   } catch (e) {
     console.error(e);

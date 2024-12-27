@@ -64,7 +64,14 @@ export const Login = async (req: Request<{}, {}, LoginReq>, res: Response) => {
       }
     )
 
-    res.cookie("tos_access", token, { maxAge: 24 * 60 * 60 * 1000 })
+    res.cookie(
+      "tos_access",
+      token,
+      {
+        maxAge: 24 * 60 * 60 * 1000,
+
+      }
+    )
     return res.status(200).json({ token: token })
 
   } catch (e) {

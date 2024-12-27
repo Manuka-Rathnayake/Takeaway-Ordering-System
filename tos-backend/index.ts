@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import http, { IncomingMessage } from "http";
+import cors from 'cors';
 import morgan from 'morgan';
 import authRoute from './src/routes/auth'
 import dotenv from 'dotenv';
@@ -23,6 +24,10 @@ const wss = new WebSocket.Server({ noServer: true })
 const port = process.env.PORT || 6300;
 
 // middleware
+app.use(cors({
+  origin: ["http://192.168.8.103:5173", "http://localhost:5173"],
+  credentials: true,
+}))
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(cookieParser())
@@ -31,16 +36,16 @@ app.use(cookieParser())
 
 // WebSoket Upgrade
 server.on('upgrade', (request: IncomingMessage, socket, head) => {
-  const user = wsAuth(request);
-  console.log("hi mf")
-
-  if (user == undefined) {
-    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-    socket.destroy();
-    return;
-  }
+  // const user = wsAuth(request);
+  // console.log("hi mf")
+  //
+  // if (user == undefined) {
+  //   socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+  //   socket.destroy();
+  //   return;
+  // }
   wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit('connection', ws, request, user);
+    wss.emit('connection', ws, request, { id: "ss", section: "kitchen" });
   });
 });
 
