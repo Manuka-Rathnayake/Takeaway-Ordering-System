@@ -8,7 +8,8 @@ import { MainLogin } from '@/pages/login';
 // import Admin from '@/AdminDashboard/Dashboard';
 import Sidebar from '@/components/ui/Admindashboard/Sidebar'; // Import Sidebar Component
 import { Menu } from 'lucide-react';
-import Stockmanagement from './components/ui/Admindashboard/Stockmanegement/stockmanagement';
+import Stockmanagement from './components/ui/Admindashboard/Stockmanegement/StockManagement';
+import Menumanagement from '@/components/ui/Admindashboard/Menumanagement/menu'
 import Dashboard from './components/ui/Admindashboard/Dashboard/dashboard';
 import Usermanagement from './components/ui/Admindashboard/Usermanagement/usermanagement';
 import Orderhistorytable from './components/ui/Admindashboard/Orderhistory/orderhistorytable';
@@ -37,7 +38,7 @@ function App() {
           element={<Sidebar />} // Sidebar wraps all Admin-related pages
         >
           <Route index element={<Dashboard />} />
-          <Route path="menumanagement" element={<Menu />} />
+          <Route path="menumanagement" element={<Menumanagement />} />
           <Route path="stockmanagement" element={<Stockmanagement />} />
           <Route path="usermanagement" element={<Usermanagement />} />
           <Route path="orderhistory" element={<Orderhistorytable />} />
