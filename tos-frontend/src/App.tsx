@@ -9,9 +9,9 @@ import { MainLogin } from '@/pages/login';
 import Sidebar from '@/components/ui/Admindashboard/Sidebar'; // Import Sidebar Component
 import { Menu } from 'lucide-react';
 import Stockmanagement from './components/ui/Admindashboard/Stockmanegement/StockManagement';
-import Menumanagement from '@/components/ui/Admindashboard/Menumanagement/menu'
+import Menumanagement from '@/components/ui/Admindashboard/Menumanagement/menu-management'
 import Dashboard from './components/ui/Admindashboard/Dashboard/dashboard';
-import Usermanagement from './components/ui/Admindashboard/Usermanagement/usermanagement';
+import Usermanagement from './components/ui/Admindashboard/Usermanagement/userman';
 import Orderhistorytable from './components/ui/Admindashboard/Orderhistory/orderhistorytable';
 // import Menumanegment from './AdminDashboard/Menumanegment';
 // import Stockmanagement from './AdminDashboard/Stockmanagement';

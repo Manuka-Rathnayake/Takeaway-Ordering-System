@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -78,9 +77,6 @@ const EditStockForm: React.FC<EditStockFormProps> = ({ itemId, onClose }) => {
               <FormControl>
                 <Input placeholder="Item name" {...field} />
               </FormControl>
-              <FormDescription>
-                This is the name of the stock item.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -105,9 +101,6 @@ const EditStockForm: React.FC<EditStockFormProps> = ({ itemId, onClose }) => {
                   <SelectItem value="Meat">Meat</SelectItem>
                 </SelectContent>
               </Select>
-              <FormDescription>
-                This is the category of the stock item.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -121,9 +114,6 @@ const EditStockForm: React.FC<EditStockFormProps> = ({ itemId, onClose }) => {
               <FormControl>
                 <Input type="number" {...field} onChange={e => field.onChange(+e.target.value)} />
               </FormControl>
-              <FormDescription>
-                This is the quantity of the stock item.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -146,9 +136,6 @@ const EditStockForm: React.FC<EditStockFormProps> = ({ itemId, onClose }) => {
                   <SelectItem value="Out of Stock">Out of Stock</SelectItem>
                 </SelectContent>
               </Select>
-              <FormDescription>
-                This is the current status of the stock item.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

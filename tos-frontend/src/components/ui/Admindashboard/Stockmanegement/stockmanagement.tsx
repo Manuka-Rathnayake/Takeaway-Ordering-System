@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import useStockStore from '@/Store/userStockStore';
 import AddStockForm from './AddStockForm';
-import EditStockForm from './EditStockForm';
+import EditStockForm from '@/components/ui/Admindashboard/Stockmanegement/EditStockForm';
 import { DataTable } from '@/components/ui/datatable';
 import {
   Dialog,

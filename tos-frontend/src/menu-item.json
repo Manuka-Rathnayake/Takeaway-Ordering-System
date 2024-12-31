@@ -1,0 +1,133 @@
+[
+  {
+    "id": "1",
+    "name": "Classic Burger",
+    "description": "Juicy beef patty with cheese, lettuce, and tomato",
+    "price": 8.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Beef Patty", "unit": 150, "unitSymbol": "g" },
+      { "name": "Cheese", "unit": 30, "unitSymbol": "g" },
+      { "name": "Lettuce", "unit": 20, "unitSymbol": "g" },
+      { "name": "Tomato", "unit": 30, "unitSymbol": "g" }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Veggie Pizza",
+    "description": "Crispy crust topped with fresh vegetables and mozzarella",
+    "price": 12.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Pizza Dough", "unit": 200, "unitSymbol": "g" },
+      { "name": "Tomato Sauce", "unit": 50, "unitSymbol": "ml" },
+      { "name": "Mozzarella", "unit": 100, "unitSymbol": "g" },
+      { "name": "Mixed Vegetables", "unit": 100, "unitSymbol": "g" }
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Caesar Salad",
+    "description": "Fresh romaine lettuce with Caesar dressing and croutons",
+    "price": 7.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Romaine Lettuce", "unit": 150, "unitSymbol": "g" },
+      { "name": "Caesar Dressing", "unit": 30, "unitSymbol": "ml" },
+      { "name": "Croutons", "unit": 20, "unitSymbol": "g" },
+      { "name": "Parmesan Cheese", "unit": 15, "unitSymbol": "g" }
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Spaghetti Carbonara",
+    "description": "Classic Italian pasta with creamy egg sauce and pancetta",
+    "price": 11.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Spaghetti", "unit": 200, "unitSymbol": "g" },
+      { "name": "Eggs", "unit": 2, "unitSymbol": "pcs" },
+      { "name": "Pancetta", "unit": 50, "unitSymbol": "g" },
+      { "name": "Parmesan Cheese", "unit": 30, "unitSymbol": "g" }
+    ]
+  },
+  {
+    "id": "5",
+    "name": "Chicken Teriyaki",
+    "description": "Grilled chicken glazed with sweet teriyaki sauce",
+    "price": 10.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Chicken Breast", "unit": 180, "unitSymbol": "g" },
+      { "name": "Teriyaki Sauce", "unit": 40, "unitSymbol": "ml" },
+      { "name": "Steamed Rice", "unit": 150, "unitSymbol": "g" },
+      { "name": "Broccoli", "unit": 50, "unitSymbol": "g" }
+    ]
+  },
+  {
+    "id": "6",
+    "name": "Fish and Chips",
+    "description": "Crispy battered fish served with golden fries",
+    "price": 13.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Cod Fillet", "unit": 200, "unitSymbol": "g" },
+      { "name": "Potato Fries", "unit": 150, "unitSymbol": "g" },
+      { "name": "Tartar Sauce", "unit": 30, "unitSymbol": "ml" },
+      { "name": "Lemon Wedge", "unit": 1, "unitSymbol": "pc" }
+    ]
+  },
+  {
+    "id": "7",
+    "name": "Mushroom Risotto",
+    "description": "Creamy Italian rice dish with assorted mushrooms",
+    "price": 14.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Arborio Rice", "unit": 180, "unitSymbol": "g" },
+      { "name": "Mixed Mushrooms", "unit": 100, "unitSymbol": "g" },
+      { "name": "Vegetable Broth", "unit": 500, "unitSymbol": "ml" },
+      { "name": "Parmesan Cheese", "unit": 30, "unitSymbol": "g" }
+    ]
+  },
+  {
+    "id": "8",
+    "name": "Beef Tacos",
+    "description": "Soft tortillas filled with seasoned ground beef and toppings",
+    "price": 9.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Ground Beef", "unit": 120, "unitSymbol": "g" },
+      { "name": "Tortillas", "unit": 3, "unitSymbol": "pcs" },
+      { "name": "Shredded Cheese", "unit": 30, "unitSymbol": "g" },
+      { "name": "Salsa", "unit": 30, "unitSymbol": "ml" }
+    ]
+  },
+  {
+    "id": "9",
+    "name": "Greek Salad",
+    "description": "Fresh Mediterranean salad with feta cheese and olives",
+    "price": 8.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Mixed Greens", "unit": 100, "unitSymbol": "g" },
+      { "name": "Feta Cheese", "unit": 50, "unitSymbol": "g" },
+      { "name": "Kalamata Olives", "unit": 30, "unitSymbol": "g" },
+      { "name": "Red Onion", "unit": 20, "unitSymbol": "g" }
+    ]
+  },
+  {
+    "id": "10",
+    "name": "Chocolate Brownie",
+    "description": "Rich, fudgy brownie served with vanilla ice cream",
+    "price": 6.99,
+    "image": "/placeholder.svg?height=200&width=200",
+    "ingredients": [
+      { "name": "Brownie", "unit": 100, "unitSymbol": "g" },
+      { "name": "Vanilla Ice Cream", "unit": 50, "unitSymbol": "g" },
+      { "name": "Chocolate Sauce", "unit": 20, "unitSymbol": "ml" },
+      { "name": "Whipped Cream", "unit": 15, "unitSymbol": "g" }
+    ]
+  }
+]
+
