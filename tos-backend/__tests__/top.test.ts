@@ -1,8 +1,14 @@
 import request from 'supertest'
-import { app, server } from '../src/index'
+import { app, server } from '../index'
+import mongoose from 'mongoose';
+
+
+const dbclose = async () => { await mongoose.disconnect() }
 
 afterAll((done) => {
+
   server.close(done);
+  dbclose();
 });
 
 describe("GET /", () => {
