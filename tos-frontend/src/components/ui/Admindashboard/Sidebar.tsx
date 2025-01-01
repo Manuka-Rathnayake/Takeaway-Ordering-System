@@ -10,7 +10,8 @@ import {
   FaBell,
   FaCog,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaLeaf
 } from 'react-icons/fa';
 import axios from 'axios';
 import { create } from 'zustand';
@@ -51,6 +52,11 @@ const AdminLayout: React.FC = () => {
       name: 'Menu Management',
       path: '/admin/menumanagement',
       icon: FaClipboardList,
+    },
+    {
+      name: 'Ingredients Stock',
+      path: '/admin/ingredients',
+      icon: FaLeaf,
     },
     {
       name: 'Stock Management',

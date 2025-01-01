@@ -13,6 +13,7 @@ import Menumanagement from '@/components/ui/Admindashboard/Menumanagement/menu-m
 import Dashboard from './components/ui/Admindashboard/Dashboard/dashboard';
 import Usermanagement from './components/ui/Admindashboard/Usermanagement/userman';
 import Orderhistorytable from './components/ui/Admindashboard/Orderhistory/orderhistorytable';
+import Ingreidents from './components/ui/Admindashboard/Ingredients/Ingreidentsmanagement';
 // import Menumanegment from './AdminDashboard/Menumanegment';
 // import Stockmanagement from './AdminDashboard/Stockmanagement';
 // import Usermanagement from './AdminDashboard/Usermanagement';
@@ -39,6 +40,7 @@ function App() {
         >
           <Route index element={<Dashboard />} />
           <Route path="menumanagement" element={<Menumanagement />} />
+          <Route path="ingredients" element={<Ingreidents />} />
           <Route path="stockmanagement" element={<Stockmanagement />} />
           <Route path="usermanagement" element={<Usermanagement />} />
           <Route path="orderhistory" element={<Orderhistorytable />} />
