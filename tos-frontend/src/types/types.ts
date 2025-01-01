@@ -79,3 +79,8 @@ export interface IOrder {
   updatedAt: string;
   __v: number;
 }
+
+export interface WSSender {
+  msType: string;
+  payload: any;
+}

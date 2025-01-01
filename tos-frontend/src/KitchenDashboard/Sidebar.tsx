@@ -6,7 +6,7 @@ function KitchenSidebar() {
   // Custom navigation items
   const myNavItems = [
     {
-      name: 'Dashboard',
+      name: 'New Orders',
       path: '/kitchen',
       icon: FaHome
     },

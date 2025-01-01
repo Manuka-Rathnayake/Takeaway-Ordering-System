@@ -56,6 +56,7 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage, user: payload) => {
 
   ws.on("message", (msg: string) => {
     const payload = JSON.parse(msg) as WSPayload
+    console.log(payload)
     wsEventHandler(payload)
   });
 

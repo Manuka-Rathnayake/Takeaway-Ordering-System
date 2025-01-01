@@ -1,4 +1,7 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useWebSocketStore } from "@/state";
+import { RefreshCcw, Wifi, WifiOff } from "lucide-react";
 import { useEffect } from "react";
 
 
@@ -20,17 +23,41 @@ export function WebSocketManager() {
   }, [wsUrl, connect, disconnect]);
 
   return (
-    <div className="websocket-status">
+    <div className="websocket-status flex flex-row items-center justify-center">
       <div className={`status-indicator ${connectionStatus}`}>
-        Connection Status: {connectionStatus}
+        {
+          connectionStatus == 'connected' ? (
+            <Badge className="bg-green-700 gap-x-2">
+              <Wifi className="w-4 h-4" /> connected
+            </Badge>
+          ) : (
+            <Badge className="bg-red-700">
+              <WifiOff className="w-4 h-4" /> disconnected
+            </Badge>
+          )
+        }
       </div>
-      <button
+      <Button
         onClick={() => connect(wsUrl)}
         disabled={connectionStatus === 'connecting' || connectionStatus === 'connected'}
         className="reconnect-btn"
+        variant="ghost"
       >
-        Reconnect
-      </button>
+        <RefreshCcw />
+      </Button>
     </div>
   );
 };
+
+{/* <div className="websocket-status"> */ }
+{/*   <div className={`status-indicator ${connectionStatus}`}> */ }
+{/*     Connection Status: {connectionStatus} */ }
+{/*   </div> */ }
+{/*   <button */ }
+{/*     onClick={() => connect(wsUrl)} */ }
+{/*     disabled={connectionStatus === 'connecting' || connectionStatus === 'connected'} */ }
+{/*     className="reconnect-btn" */ }
+{/*   > */ }
+{/*     Reconnect */ }
+{/*   </button> */ }
+{/* </div> */ }

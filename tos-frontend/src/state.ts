@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { INotification, IOrder } from "./types/types";
+import { INotification, IOrder, WSSender } from "./types/types";
 
 type AppStore = {
   completeOrder: IOrder[];
@@ -12,6 +12,7 @@ type AppStore = {
   getOrderById: (id: string) => IOrder | undefined
   getOrdersByStatus: (status: string) => IOrder[]
   addNotification: (notify: INotification) => Promise<void>
+  refreshOrder: (orders: IOrder[]) => Promise<void>
 };
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -117,6 +118,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
     set(state => ({
       notification: [...state.notification, notify]
     }))
+  },
+  refreshOrder: async (orders: IOrder[]) => {
+    set({
+      pendingOrder: orders.filter(order => order.status === "pending"),
+      processingOrder: orders.filter(order => order.status === "processing"),
+      completeOrder: orders.filter(order => order.status === "complete"),
+      cancleOrder: orders.filter(order => order.status === "cancle"),
+    });
   }
 }));
 
@@ -126,7 +135,7 @@ type WebSocketStore = {
   socket: WebSocket | null;
   connect: (url: string) => void;
   disconnect: () => void;
-  sendMessage: (message: string) => void;
+  sendMessage: (message: WSSender) => void;
   lastNotification: INotification | null;
 };
 
@@ -174,7 +183,16 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
               // icon: notification.icon // If you have an icon
             });
           }
-        } else if (data.type == )
+        } else if (data.type == 'add-Order') {
+          const { addOrder } = useAppStore.getState();
+          addOrder(data.data)
+        } else if (data.type == 'refresh-Order') {
+          const { refreshOrder } = useAppStore.getState();
+          refreshOrder(data.data)
+        } else if (data.type == 'state-order') {
+          const { changeOrderStateForward } = useAppStore.getState();
+          changeOrderStateForward(data.data)
+        }
         // Add more message type handlers as needed
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
@@ -202,10 +220,12 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
     set({ connectionStatus: 'disconnected', socket: null });
   },
 
-  sendMessage: (message: string) => {
+  sendMessage: (message: WSSender) => {
     const socket = get().socket;
     if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(message);
+
+      const jsonfyMSG = JSON.stringify(message)
+      socket.send(jsonfyMSG);
     } else {
       console.warn('WebSocket is not open. Cannot send message.');
     }
