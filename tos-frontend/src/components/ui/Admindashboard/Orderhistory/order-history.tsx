@@ -36,7 +36,7 @@ export default function OrderHistory() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Order history</h1>
+      <h1 className="text-3xl font-semibold mb-6">Order history</h1>
       
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <Select
@@ -74,7 +74,7 @@ export default function OrderHistory() {
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500">CUSTOMER NAME</th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500">STATUS</th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500">TOTAL</th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500">ACTION</th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500"></th>
             </tr>
           </thead>
           <tbody>
@@ -94,7 +94,7 @@ export default function OrderHistory() {
                 <td className="px-6 py-4 text-sm">
                   <button
                     onClick={() => setSelectedOrder(order)}
-                    className="text-red-600 hover:text-red-700 font-medium text-sm"
+                    className="text-[#EF4444] hover:text-red-700 font-medium text-sm"
                   >
                     View Details →
                   </button>

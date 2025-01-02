@@ -164,7 +164,7 @@ export function EditIngredientDialog({ ingredient }: EditIngredientDialogProps) 
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit" className="bg-[#EF4444]">Save Changes</Button>
             </DialogFooter>
           </form>
         </Form>

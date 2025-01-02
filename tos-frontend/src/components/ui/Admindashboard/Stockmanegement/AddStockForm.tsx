@@ -90,7 +90,7 @@ export function AddStockForm({ open, onClose, onSubmit }: AddStockFormProps) {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">Add</Button>
+            <Button type="submit" className='bg-[#EF4444]'>Add</Button>
           </div>
         </form>
       </DialogContent>

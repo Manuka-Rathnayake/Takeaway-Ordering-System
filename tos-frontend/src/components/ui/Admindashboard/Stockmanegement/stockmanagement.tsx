@@ -69,8 +69,8 @@ export function StockManagement() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Stock Management</h1>
-        <Button onClick={() => setIsAddFormOpen(true)}>
+        <h1 className="text-3xl font-semibold">Stock Management</h1>
+        <Button onClick={() => setIsAddFormOpen(true)} className='bg-[#EF4444] text-white'>
           <Plus className="w-4 h-4 mr-2" />
           Add Stock
         </Button>

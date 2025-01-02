@@ -15,24 +15,24 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onClose }) => {
     <Dialog open={!!order} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Order Details - {order.id}</DialogTitle>
+          <DialogTitle className='text-[#EF4444]'>Order Details - {order.id}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="font-semibold">Customer Information</h3>
+              <h3 className="font-bold">Customer Information</h3>
               <p>Name: {order.customerName}</p>
               <p>Customer Number: {order.customerNumber}</p>
             </div>
             <div>
-              <h3 className="font-semibold">Order Information</h3>
+              <h3 className="font-bold">Order Information</h3>
               <p>Status: {order.status}</p>
               <p>Kitchen Status: {order.statusKitchen}</p>
               <p>Created: {format(new Date(order.createdAt), 'PPp')}</p>
             </div>
           </div>
           <div>
-            <h3 className="font-semibold">Menu Items</h3>
+            <h3 className="font-bold">Menu Items</h3>
             <ul className="list-disc pl-5">
               {order.menuItems.map((item, index) => (
                 <li key={index}>
@@ -42,7 +42,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onClose }) => {
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold">Payment Details</h3>
+            <h3 className="font-bold">Payment Details</h3>
             <p>Total Price: ${order.totalPrice.toFixed(2)}</p>
             <p>Discount: ${order.discount.toFixed(2)}</p>
             <p>Payment Status: {order.payment.isPaid ? 'Paid' : 'Unpaid'}</p>

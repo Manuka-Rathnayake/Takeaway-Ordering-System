@@ -67,7 +67,7 @@ export function AddIngredientDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="bg-[#EF4444]">
           <Plus className="mr-2 h-4 w-4" />
           Add Ingredient
         </Button>
@@ -156,7 +156,7 @@ export function AddIngredientDialog() {
               )}
             />
             <DialogFooter>
-              <Button type="submit">Add Ingredient</Button>
+              <Button type="submit" className="bg-[#EF4444]">Add Ingredient</Button>
             </DialogFooter>
           </form>
         </Form>

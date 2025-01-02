@@ -161,7 +161,7 @@ export function Ingredients() {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Ingredient Stock</h1>
+        <h1 className="text-3xl font-semibold">Ingredient Stock</h1>
         <AddIngredientDialog />
       </div>
       <div className="flex items-center py-4">

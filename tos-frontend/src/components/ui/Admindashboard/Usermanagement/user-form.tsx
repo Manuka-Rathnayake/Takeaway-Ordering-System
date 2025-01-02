@@ -201,7 +201,7 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="bg-[#EF4444]">
               Add User
             </Button>
           </div>
