@@ -2,13 +2,12 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import './App.css';
 import { MainLogin } from '@/pages/login';
 import Sidebar from '@/components/ui/Admindashboard/Sidebar';
-import { Menu } from 'lucide-react';
-import Stockmanagement from './components/ui/Admindashboard/Stockmanegement/StockManagement';
-import Menumanagement from '@/components/ui/Admindashboard/Menumanagement/menu-management'
+import { StockManagement } from '@/components/ui/Admindashboard/Stockmanegement/stockmanagement';
+import MenuManagement from '@/components/ui/Admindashboard/Menumanagement/menu-management'
 import Dashboard from './components/ui/Admindashboard/Dashboard/dashboard';
-import Usermanagement from './components/ui/Admindashboard/Usermanagement/userman';
-import OrderHistory from './components/ui/Admindashboard/Orderhistory/order-history'; // Updated import
-import Ingreidents from './components/ui/Admindashboard/Ingredients/Ingreidentsmanagement';
+import UserManagement from './components/ui/Admindashboard/Usermanagement/userman';
+import OrderHistory from './components/ui/Admindashboard/Orderhistory/order-history';
+import IngredientManagement from './components/ui/Admindashboard/Ingredients/Ingreidentsmanagement';
 
 function App() {
   return (
@@ -19,15 +18,12 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* Admin Routes */}
-        <Route
-          path="/admin/*"
-          element={<Sidebar />}
-        >
+        <Route path="/admin" element={<Sidebar />}>
           <Route index element={<Dashboard />} />
-          <Route path="menumanagement" element={<Menumanagement />} />
-          <Route path="ingredients" element={<Ingreidents />} />
-          <Route path="stockmanagement" element={<Stockmanagement />} />
-          <Route path="usermanagement" element={<Usermanagement />} />
+          <Route path="menumanagement" element={<MenuManagement />} />
+          <Route path="ingredients" element={<IngredientManagement />} />
+          <Route path="stockmanagement" element={<StockManagement />} />
+          <Route path="usermanagement" element={<UserManagement />} />
           <Route path="orderhistory" element={<OrderHistory />} />
         </Route>
       </Routes>

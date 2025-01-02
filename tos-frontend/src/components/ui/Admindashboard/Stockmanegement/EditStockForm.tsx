@@ -1,150 +1,109 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import useStockStore from '@/Store/userStockStore';
+import { useEffect, useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import type { FoodItem, Unit } from '@/stockData'
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  category: z.string().min(2, { message: "Category must be at least 2 characters." }),
-  quantity: z.number().min(0, { message: "Quantity must be a positive number." }),
-  status: z.enum(['In Stock', 'Low Stock', 'Out of Stock']),
-});
+type Unit = 'kg' | 'g' | 'L' | 'mL' | 'pcs' | 'dozen' | 'box'
 
 interface EditStockFormProps {
-  itemId: string;
-  onClose: () => void;
+  open: boolean
+  onClose: () => void
+  onSubmit: (data: Omit<FoodItem, 'id'>) => Promise<void>
+  editItem: FoodItem | null
 }
 
-const EditStockForm: React.FC<EditStockFormProps> = ({ itemId, onClose }) => {
-  const { items, updateItem } = useStockStore();
-  const item = items.find(i => i.id === itemId);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: item?.name || "",
-      category: item?.category || "",
-      quantity: item?.quantity || 0,
-      status: item?.status || "In Stock",
-    },
-  });
+export function EditStockForm({ open, onClose, onSubmit, editItem }: EditStockFormProps) {
+  const [formData, setFormData] = useState<Omit<FoodItem, 'id'>>({
+    name: '',
+    brand: '',
+    quantity: 0,
+    unit: 'pcs'
+  })
 
   useEffect(() => {
-    if (item) {
-      form.reset({
-        name: item.name,
-        category: item.category,
-        quantity: item.quantity,
-        status: item.status,
-      });
+    if (editItem) {
+      setFormData({
+        name: editItem.name,
+        brand: editItem.brand,
+        quantity: editItem.quantity,
+        unit: editItem.unit
+      })
     }
-  }, [item, form]);
+  }, [editItem])
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateItem(itemId, values);
-    onClose();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await onSubmit(formData)
+    onClose()
   }
 
-  if (!item) return null;
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Item name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                </FormControl>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Stock</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="name">Product Name</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="brand">Brand</Label>
+            <Input
+              id="brand"
+              value={formData.brand}
+              onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="quantity">Quantity</Label>
+            <div className="flex gap-2">
+              <Input
+                id="quantity"
+                type="number"
+                min="0"
+                value={formData.quantity}
+                onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+                required
+              />
+              <Select
+                value={formData.unit}
+                onValueChange={(value: Unit) => setFormData({ ...formData, unit: value })}
+              >
+                <SelectTrigger className="w-24">
+                  <SelectValue placeholder="Unit" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Fruit">Fruit</SelectItem>
-                  <SelectItem value="Vegetable">Vegetable</SelectItem>
-                  <SelectItem value="Dairy">Dairy</SelectItem>
-                  <SelectItem value="Bakery">Bakery</SelectItem>
-                  <SelectItem value="Meat">Meat</SelectItem>
+                  <SelectItem value="kg">kg</SelectItem>
+                  <SelectItem value="g">g</SelectItem>
+                  <SelectItem value="L">L</SelectItem>
+                  <SelectItem value="mL">mL</SelectItem>
+                  <SelectItem value="pcs">pcs</SelectItem>
+                  <SelectItem value="dozen">dozen</SelectItem>
+                  <SelectItem value="box">box</SelectItem>
                 </SelectContent>
               </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="quantity"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quantity</FormLabel>
-              <FormControl>
-                <Input type="number" {...field} onChange={e => field.onChange(+e.target.value)} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="In Stock">In Stock</SelectItem>
-                  <SelectItem value="Low Stock">Low Stock</SelectItem>
-                  <SelectItem value="Out of Stock">Out of Stock</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Update</Button>
-      </form>
-    </Form>
-  );
-};
-
-export default EditStockForm;
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">Update</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
