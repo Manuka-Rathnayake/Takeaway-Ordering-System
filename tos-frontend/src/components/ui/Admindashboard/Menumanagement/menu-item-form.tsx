@@ -195,7 +195,7 @@ export function MenuItemForm({ initialData, onSubmit }: MenuItemFormProps) {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">Ingredients</h3>
-              <Button type="button" onClick={addIngredient}>
+              <Button type="button" onClick={addIngredient} className='bg-[#EF4444] text-white'>
                 Add Ingredient
               </Button>
             </div>
@@ -246,7 +246,7 @@ export function MenuItemForm({ initialData, onSubmit }: MenuItemFormProps) {
             ))}
           </div>
 
-          <Button type="submit">
+          <Button type="submit" className='bg-[#EF4444] text-white'>
             {initialData ? 'Update Menu Item' : 'Add Menu Item'}
           </Button>
         </form>

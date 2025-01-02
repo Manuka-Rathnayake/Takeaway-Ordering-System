@@ -44,6 +44,7 @@ export function UserManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [rowSelection, setRowSelection] = useState({})
 
   const {
     users,
@@ -108,6 +109,7 @@ export function UserManagement() {
     },
     {
       id: "actions",
+      header: "", // Removed "Actions" text
       cell: ({ row }) => {
         const user = row.original
         return (
@@ -115,6 +117,7 @@ export function UserManagement() {
             <Button
               variant="ghost"
               size="icon"
+              className="h-8 w-8"
               onClick={() => {
                 setSelectedUser(user)
                 setIsEditDialogOpen(true)
@@ -125,6 +128,7 @@ export function UserManagement() {
             <Button
               variant="ghost"
               size="icon"
+              className="h-8 w-8 text-red-500"
               onClick={() => {
                 setSelectedUser(user)
                 setIsDeleteDialogOpen(true)
@@ -143,6 +147,10 @@ export function UserManagement() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+    },
   })
 
   const getRoleColor = (role: string) => {
@@ -161,8 +169,8 @@ export function UserManagement() {
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">User Management</h1>
-        <Button onClick={() => setIsAddDialogOpen(true)}>
+        <h1 className="text-3xl font-semibold">User Management</h1>
+        <Button onClick={() => setIsAddDialogOpen(true)} className="bg-[#EF4444] text-white">
           <Plus className="mr-2 h-4 w-4" />
           Add New User
         </Button>
@@ -202,9 +210,9 @@ export function UserManagement() {
         <table className="w-full">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
+              <tr key={headerGroup.id} className="bg-gray-50 border-b border-gray-200">
                 {headerGroup.headers.map((header) => (
-                  <th key={header.id} className="px-4 py-2 text-left">
+                  <th key={header.id} className="px-6 py-4 text-left text-sm font-medium text-gray-500">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -216,11 +224,14 @@ export function UserManagement() {
               </tr>
             ))}
           </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {table.getRowModel().rows.map((row, i) => (
+              <tr 
+                key={row.id}
+                className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+              >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-2">
+                  <td key={cell.id} className="px-6 py-4 text-sm text-gray-900">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -230,31 +241,22 @@ export function UserManagement() {
         </table>
       </div>
 
-      <div className="flex items-center justify-between mt-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} user(s) total
+      <div className="flex items-center justify-between py-4">
+        <div className="text-sm text-muted-foreground">
+          {Object.keys(rowSelection).length} of {filteredUsers.length} row(s) selected.
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-6">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            className={!table.getCanPreviousPage() ? "text-muted-foreground" : ""}
           >
             Previous
           </Button>
-          {Array.from({ length: table.getPageCount() }, (_, i) => i + 1).map((page) => (
-            <Button
-              key={page}
-              variant={table.getState().pagination.pageIndex + 1 === page ? "default" : "outline"}
-              size="sm"
-              onClick={() => table.setPageIndex(page - 1)}
-            >
-              {page}
-            </Button>
-          ))}
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}

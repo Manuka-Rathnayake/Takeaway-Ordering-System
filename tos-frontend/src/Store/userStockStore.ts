@@ -1,36 +1,81 @@
-import { create } from 'zustand';
-
-export interface StockItem {
-  id: string;
-  name: string;
-  category: string;
-  quantity: number;
-  status: 'In Stock' | 'Low Stock' | 'Out of Stock';
-}
+import { create } from 'zustand'
+import { mockFoods } from '@/stockData'
+import type { FoodItem, Unit } from '@/stockData'
 
 interface StockStore {
-  items: StockItem[];
-  addItem: (item: StockItem) => void;
-  updateItem: (id: string, item: Partial<StockItem>) => void;
-  deleteItem: (id: string) => void;
+  items: FoodItem[]
+  loading: boolean
+  error: string | null
+  selectedItem: FoodItem | null
+  fetchStock: () => Promise<void>
+  addStock: (data: Omit<FoodItem, 'id'>) => Promise<void>
+  updateStock: (id: number, data: Omit<FoodItem, 'id'>) => Promise<void>
+  deleteStock: (id: number) => Promise<void>
+  setSelectedItem: (item: FoodItem | null) => void
 }
 
-const useStockStore = create<StockStore>((set) => ({
-  items: [
-    { id: "1", name: "Apple", category: "Fruit", quantity: 100, status: "In Stock" },
-    { id: "2", name: "Banana", category: "Fruit", quantity: 50, status: "Low Stock" },
-    { id: "3", name: "Carrot", category: "Vegetable", quantity: 0, status: "Out of Stock" },
-    { id: "4", name: "Milk", category: "Dairy", quantity: 75, status: "In Stock" },
-    { id: "5", name: "Bread", category: "Bakery", quantity: 25, status: "Low Stock" }
-  ],
-  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
-  updateItem: (id, updatedItem) => set((state) => ({
-    items: state.items.map((item) => (item.id === id ? { ...item, ...updatedItem } : item))
-  })),
-  deleteItem: (id) => set((state) => ({
-    items: state.items.filter((item) => item.id !== id)
-  })),
-}));
+const generateId = () => {
+  return `STK${Math.random().toString(36).substr(2, 9)}`
+}
 
-export default useStockStore;
+export const useStockStore = create<StockStore>((set) => ({
+  items: [],
+  loading: false,
+  error: null,
+  selectedItem: null,
+
+  fetchStock: async () => {
+    set({ loading: true })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      const itemsWithAutoId = mockFoods.map(item => ({
+        ...item,
+        id: generateId()
+      }))
+      set({ items: itemsWithAutoId, loading: false })
+    } catch (error) {
+      set({ error: 'Failed to fetch stock items', loading: false })
+    }
+  },
+
+  addStock: async (data) => {
+    try {
+      const newItem: FoodItem = {
+        id: generateId(),
+        ...data
+      }
+      set((state) => ({ items: [...state.items, newItem] }))
+    } catch (error) {
+      set({ error: 'Failed to add stock item' })
+    }
+  },
+
+  updateStock: async (id, data) => {
+    try {
+      set((state) => ({
+        items: state.items.map((item) =>
+          item.id === id
+            ? { ...item, ...data }
+            : item
+        )
+      }))
+    } catch (error) {
+      set({ error: 'Failed to update stock item' })
+    }
+  },
+
+  deleteStock: async (id) => {
+    try {
+      set((state) => ({
+        items: state.items.filter((item) => item.id !== id)
+      }))
+    } catch (error) {
+      set({ error: 'Failed to delete stock item' })
+    }
+  },
+
+  setSelectedItem: (item: FoodItem | null) => {
+    set({ selectedItem: item })
+  }
+}))
 
