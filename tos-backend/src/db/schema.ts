@@ -64,6 +64,7 @@ export interface IMenuIngredients {
 export interface IMenuItem extends Document {
   name: string,
   des: string,
+  imagePath: string,
   price: Types.Decimal128,
   ingredients: IMenuIngredients[],
 }
@@ -76,6 +77,9 @@ const menuItemSchema = new Schema<IMenuItem>({
     unique: true
   },
   des: {
+    type: String,
+  },
+  imagePath: {
     type: String,
   },
   price: {
@@ -147,13 +151,13 @@ const orderSchema = new Schema<IOrder>({
   status: {
     type: String,
     required: true,
-    enum: ['pending', 'completed', 'cancelled'],
+    enum: ["pending", "processing", "completed", "cancelled"],
     default: 'pending'
   },
   statusKitchen: {
     type: String,
     required: true,
-    enum: ['queued', 'preparing', 'ready', 'served'],
+    enum: ["pending", "processing", "completed", "cancelled"],
     default: 'queued'
   },
   addUser: {

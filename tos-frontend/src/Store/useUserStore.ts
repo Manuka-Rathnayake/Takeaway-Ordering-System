@@ -83,7 +83,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
     try {
       const { fetchUsers } = get();
       set({ isLoading: true, error: null })
-      // In a real app, this would be an API call
+      // this would be an API call(real app)
       // const response = await axios.post('/api/users', userData)
       await api.post('/auth/register', userData)
       fetchUsers()
@@ -98,7 +98,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
   updateUser: async (id, userData) => {
     try {
       set({ isLoading: true, error: null })
-      // In a real app, this would be an API call
+      // this would be an API call(real app)
       // const response = await axios.put(`/api/users/${id}`, userData)
       const { fetchUsers } = get()
       console.log(userData)
@@ -117,6 +117,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       set({ isLoading: true, error: null })
       console.log(id)
       // In a real app, this would be an API call
+      // this would be an API call(real app)
       // await axios.delete(`/api/users/${id}`)
       const { fetchUsers } = get()
       await api.delete(`/auth/${id}`)
@@ -132,7 +133,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
   fetchUsers: async () => {
     try {
       set({ isLoading: true, error: null })
-      // In a real app, this would be an API call
+      // this would be an API call(real app)
       // const response = await axios.get('/api/users')
       // const users = response.data
       const res = await api.get('/auth/')

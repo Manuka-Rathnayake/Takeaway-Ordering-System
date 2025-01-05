@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const UnitDataSchema = z.object({
   unit: z.number().positive("Unit must be a positive number"),
-  unitSymbol: z.string().min(1, "Unit symbol is required")
+  unitSymbol: z.string()
 });
 
 export const AddStockUpdateSchema = z.object({

@@ -1,21 +1,40 @@
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useWebSocketStore } from "@/state";
+import { useAppStore } from "@/state";
+import OrderCard from "./orderCard";
+import { useMemo } from "react";
+
+
 
 export default function KitchenDashboard() {
-  const { sendMessage } = useWebSocketStore();
+  const { pendingOrder, processingOrder, completeOrder } = useAppStore();
 
-  // const sendOnclick = () => {
-  //   console.log("hie")
-  //   sendMessage({
-  //     msType: "start-msh",
-  //     payload: "hi"
-  //   })
-  // }
+
+  const combinedArry = useMemo(() => {
+    return [...pendingOrder, ...processingOrder, ...completeOrder].sort((a, b) => {
+      const dateA = new Date(a.updatedAt).getTime();
+      const dateB = new Date(b.updatedAt).getTime();
+      return dateB - dateA;
+    });
+  }, [pendingOrder, processingOrder, completeOrder]);
+
   return (
     <>
-      <ScrollArea className="w-full felx flex-row h-full" >
-      </ScrollArea>
+      <div className="flex flex-col overflow-auto"  >
+        <div className="flex flex-row pb-5">
+          <h1 className="text-2xl font-semibold">
+            All Orders (today)
+          </h1>
+        </div>
+        <div className="flex flex-col gap-y-4 ">
+
+          {combinedArry.length > 0 ? (
+            combinedArry.map(item => <OrderCard key={item._id} data={item} />)
+          ) : (
+            <p>Orders are not placed today</p>
+          )}
+        </div>
+      </div>
     </>
   )
 }
+
+

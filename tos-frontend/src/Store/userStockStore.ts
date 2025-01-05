@@ -1,36 +1,119 @@
-import { create } from 'zustand';
+import { create } from 'zustand'
+import { DecimalType } from '@/types/types'
+import api from '@/utils/axios'
 
-export interface StockItem {
-  id: string;
-  name: string;
-  category: string;
+export interface addStockUpdate {
+  ingredientId: string;
+  brand: string;
   quantity: number;
-  status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  unitSymbol: string;
+}
+
+export interface stockUpdateI {
+  stockedUnit: {
+    unit: DecimalType;
+    unitSymbol: string;
+  };
+  _id: string;
+  ingredientId: {
+    _id: string;
+    name: string;
+  };
+  productBrand: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 interface StockStore {
-  items: StockItem[];
-  addItem: (item: StockItem) => void;
-  updateItem: (id: string, item: Partial<StockItem>) => void;
-  deleteItem: (id: string) => void;
+  items: stockUpdateI[]
+  loading: boolean
+  error: string | null
+  selectedItem: stockUpdateI | null
+  fetchStock: () => Promise<void>
+  addStock: (data: addStockUpdate) => Promise<void>
+  updateStock: (id: string, data: addStockUpdate) => Promise<void>
+  deleteStock: (id: string) => Promise<void>
+  setSelectedItem: (item: stockUpdateI | null) => void
 }
 
-const useStockStore = create<StockStore>((set) => ({
-  items: [
-    { id: "1", name: "Apple", category: "Fruit", quantity: 100, status: "In Stock" },
-    { id: "2", name: "Banana", category: "Fruit", quantity: 50, status: "Low Stock" },
-    { id: "3", name: "Carrot", category: "Vegetable", quantity: 0, status: "Out of Stock" },
-    { id: "4", name: "Milk", category: "Dairy", quantity: 75, status: "In Stock" },
-    { id: "5", name: "Bread", category: "Bakery", quantity: 25, status: "Low Stock" }
-  ],
-  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
-  updateItem: (id, updatedItem) => set((state) => ({
-    items: state.items.map((item) => (item.id === id ? { ...item, ...updatedItem } : item))
-  })),
-  deleteItem: (id) => set((state) => ({
-    items: state.items.filter((item) => item.id !== id)
-  })),
-}));
+// const generateId = () => {
+//   return `STK${Math.random().toString(36).substr(2, 9)}`
+// }
 
-export default useStockStore;
+export const useStockStore = create<StockStore>((set, get) => ({
+  items: [],
+  loading: false,
+  error: null,
+  selectedItem: null,
+
+  fetchStock: async () => {
+    try {
+      set({ loading: true })
+      const res = await api.get('stockupdate/all')
+      const data: stockUpdateI[] = res.data.data;
+      set({ items: data })
+    } catch (error) {
+      console.log(error)
+      set({ error: 'Failed to fetch stock items', loading: false })
+    } finally {
+      set({ loading: false })
+    }
+  },
+
+  addStock: async (data) => {
+    try {
+      const { fetchStock } = get();
+      const req = {
+        ingredientId: data.ingredientId,
+        productBrand: data.brand,
+        stockedUnit: {
+          unit: data.quantity,
+          unitSymbol: data.unitSymbol
+        }
+      }
+      console.log(req)
+      await api.post('/stockupdate/add', req)
+      fetchStock()
+    } catch (error) {
+      console.log(error)
+      set({ error: 'Failed to add stock item' })
+    }
+  },
+
+  updateStock: async (id, data) => {
+    try {
+      const { fetchStock } = get();
+      const req = {
+        ingredientId: data.ingredientId,
+        productBrand: data.brand,
+        stockedUnit: {
+          unit: data.quantity,
+          unitSymbol: data.unitSymbol
+        }
+      }
+      console.log(req)
+      await api.put(`/stockupdate/${id}`, req)
+      fetchStock()
+    } catch (error) {
+      console.log(error)
+      set({ error: 'Failed to update stock item' })
+    }
+  },
+
+  deleteStock: async (id) => {
+    try {
+      const { fetchStock } = get();
+      await api.delete(`/stockupdate/${id}`)
+      fetchStock()
+    } catch (error) {
+      console.log(error)
+      set({ error: 'Failed to delete stock item' })
+    }
+  },
+
+  setSelectedItem: (item: stockUpdateI | null) => {
+    set({ selectedItem: item })
+  }
+}))
 

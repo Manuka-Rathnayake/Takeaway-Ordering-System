@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-const OrderStatus = ["pending", "completed", "cancelled"] as const;
-const KitchenStatus = ["queued", "preparing", "ready", "served"] as const;
+const OrderStatus = ["pending", "processing", "completed", "cancelled"] as const;
 
 export const OrderMenuItemSchema = z.object({
   id: z.string(), // MongoDB ObjectId as string
@@ -21,7 +20,7 @@ export const AddOrderSchema = z.object({
   customerNumber: z.string().min(1, "Customer number is required"),
   customerName: z.string().min(2, "Customer name must be at least 2 characters"),
   status: z.enum(OrderStatus).optional().default("pending"),
-  statusKitchen: z.enum(KitchenStatus).optional().default("queued"),
+  statusKitchen: z.enum(OrderStatus).optional().default("pending"),
   // addUser: z.string().min(1, "Add user is required"),
   // price: z.number().positive("Price must be positive"),
   // totalPrice: z.number().positive("Total price must be positive"),
@@ -37,7 +36,7 @@ export const UpdateOrderSchema = z.object({
   customerNumber: z.string().optional(),
   customeName: z.string().optional(),
   status: z.enum(OrderStatus).optional(),
-  statusKitchen: z.enum(KitchenStatus).optional(),
+  statusKitchen: z.enum(OrderStatus).optional(),
   price: z.number().positive("Price must be positive").optional(),
   totalPrice: z.number().positive("Total price must be positive").optional(),
   discount: z.number().nonnegative("Discount cannot be negative").optional(),
@@ -54,7 +53,7 @@ export const GetTableOrderSchema = z.object({
 
 export const UpdateOrderStatusSchema = z.object({
   status: z.enum(OrderStatus).optional(),
-  statusKitchen: z.enum(KitchenStatus).optional()
+  statusKitchen: z.enum(OrderStatus).optional()
 });
 
 export const AddMenuItemToOrderSchema = z.object({

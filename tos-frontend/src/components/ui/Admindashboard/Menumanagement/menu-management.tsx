@@ -24,11 +24,12 @@ export default function MenuManagement() {
     return <div className="container mx-auto py-8">Error: {error}</div>
   }
 
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Menu Management</h1>
-        <Button onClick={() => setShowAddForm(true)}>
+        <h1 className="text-3xl font-semibold">Menu Management</h1>
+        <Button onClick={() => setShowAddForm(true)} className='bg-[#EF4444] text-white'>
           <Plus className="h-4 w-4 mr-2" />
           Add Menu Item
         </Button>
@@ -37,7 +38,7 @@ export default function MenuManagement() {
       {menuItems.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {menuItems.map((item) => (
-            <MenuItemCard key={item.id} item={item} />
+            <MenuItemCard key={item._id} item={item} />
           ))}
         </div>
       ) : (

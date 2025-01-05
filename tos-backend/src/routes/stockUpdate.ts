@@ -5,7 +5,7 @@ import { AddStockUpdateSchema, UpdateStockUpdateSchema } from "../schema/stockUp
 
 const stockUpdateRoute = Router();
 
-stockUpdateRoute.post('/table',
+stockUpdateRoute.get('/all',
   getAllStockUpdates
 )
 

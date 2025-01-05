@@ -4,53 +4,38 @@ import { Types } from "mongoose";
 
 export const getAllStockUpdates = async (req: Request, res: Response) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-      productBrand,
-      ingredientId
-    } = req.body;
-
-    // Build filter
-    const filter: any = {};
-    if (productBrand) filter.productBrand = productBrand;
-    if (ingredientId) filter.ingredientId = ingredientId;
-
-    // Build sort
-    const sort: any = { [sortBy as string]: sortOrder === 'asc' ? 1 : -1 };
-
-    // Pagination
-    const pageNumber = Number(page);
-    const limitNumber = Number(limit);
-    const skip = (pageNumber - 1) * limitNumber;
-
-    // Fetch stock updates
-    const stockUpdates = await StockUpdate.find(filter)
-      .populate('ingredientId')
-      .sort(sort)
-      .skip(skip)
-      .limit(limitNumber);
-
-    // Count total documents
-    const total = await StockUpdate.countDocuments(filter);
-
-    res.json({
-      stockUpdates,
-      pagination: {
-        currentPage: pageNumber,
-        totalPages: Math.ceil(total / limitNumber),
-        totalItems: total
-      }
-    });
+    const data = await StockUpdate.find()
+      .populate({
+        path: 'ingredientId', // Path to populate
+        select: 'name', // Select only the name field
+      });
+    // return res.status(200).json({
+    //   data: data.map((update) => ({
+    //     ...update.toObject(),
+    //     ingredientName: update.ingredientId?.name,
+    //     ingredientId: update.ingredientId?._id,
+    //   })),
+    // });
+    //
+    return res.status(200).json({ data })
   } catch (error) {
     res.status(500).json({
       message: 'Error fetching stock updates',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 };
+// export const getAllStockUpdates = async (req: Request, res: Response) => {
+//   try {
+//     const data = await StockUpdate.find();
+//     return res.status(200).json({ data });
+//   } catch (error) {
+//     res.status(500).json({
+//       message: 'Error fetching stock updates',
+//       error: error instanceof Error ? error.message : 'Unknown error'
+//     });
+//   }
+// };
 
 export const validateStockUpdate = async (
   ingredientId: string,

@@ -1,20 +1,35 @@
 import NavSidebarLayout from '@/components/default/sidebarTemplate';
-import { Radio } from 'lucide-react';
-import { FaHome } from 'react-icons/fa';
+import { Boxes, Package2, PackageCheck, PackageSearch, PackageX } from 'lucide-react';
 
 function KitchenSidebar() {
   // Custom navigation items
   const myNavItems = [
     {
-      name: 'New Orders',
+      name: 'All Orders',
       path: '/kitchen',
-      icon: FaHome
+      icon: Boxes
     },
     {
-      name: 'Live Board',
-      path: '/kitchen/liveorderboard',
-      icon: Radio
-    }
+      name: 'Pending Orders',
+      path: '/kitchen/pendingorders',
+      icon: PackageSearch
+    },
+    {
+      name: 'Processing Orders',
+      path: '/kitchen/processingorders',
+      icon: Package2
+    },
+    {
+      name: 'Complete Orders',
+      path: '/kitchen/completeorders',
+      icon: PackageCheck
+    },
+    {
+      name: 'Cancel Orders',
+      path: '/kitchen/cancelorders',
+      icon: PackageX
+    },
+
   ];
 
   // Custom sidebar footer

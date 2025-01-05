@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
-import { Ingredient, MenuItem } from "../db/schema";
+import { IMenuIngredients, Ingredient, MenuItem } from "../db/schema";
 import { SortOrder, Types } from "mongoose";
+import fs from "fs";
+import multer from "multer";
+import { fsupload } from "../utils/fsUpload";
 
 export const getAllMenuItems = async (req: Request, res: Response) => {
   try {
@@ -14,42 +17,100 @@ export const getAllMenuItems = async (req: Request, res: Response) => {
 
 export const addMenuItem = async (req: Request, res: Response) => {
   try {
-    const { name, price, des, ingredients = [] } = req.body;
-
-    // Validate ingredients exist
-    if (ingredients.length > 0) {
-      const ingredientIds = ingredients.map((ing: any) => ing.id);
-      const existingIngredients = await Ingredient.find({ _id: { $in: ingredientIds } });
-
-      if (existingIngredients.length !== ingredientIds.length) {
-        return res.status(400).json({ msg: "Some ingredients do not exist" });
+    // Handle the file upload first
+    fsupload.single('image')(req, res, async (err) => {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ msg: `Upload error: ${err.message}` });
+      } else if (err) {
+        return res.status(400).json({ msg: err.message });
       }
-    }
 
-    const newMenuItem = new MenuItem({
-      name,
-      des: des,
-      price: Types.Decimal128.fromString(price.toString()),
-      ingredients: ingredients.map((ing: any) => ({
-        id: new Types.ObjectId(ing.id),
-        stockLevel: {
-          unit: Types.Decimal128.fromString(ing.stockLevel.unit.toString()),
-          unitSymbol: ing.stockLevel.unitSymbol
+      const { name, price, des } = req.body;
+      const ingredients: IMenuIngredients[] = JSON.parse(req.body.ingredients);
+
+      // Validate ingredients exist
+      if (ingredients.length > 0) {
+        const ingredientIds = ingredients.map((ing: any) => ing.id);
+        const existingIngredients = await Ingredient.find({ _id: { $in: ingredientIds } });
+        if (existingIngredients.length !== ingredientIds.length) {
+          // Remove uploaded file if ingredients validation fails
+          if (req.file) {
+            fs.unlinkSync(req.file.path);
+          }
+          return res.status(400).json({ msg: "Some ingredients do not exist" });
         }
-      }))
-    });
+      }
 
-    await newMenuItem.save();
+      // Create new menu item with image path
+      const newMenuItem = new MenuItem({
+        name,
+        des: des,
+        price: Types.Decimal128.fromString(price.toString()),
+        imagePath: req.file ? `/${req.file.path}` : undefined, // Save the file path if an image was uploaded
+        ingredients: ingredients.map((ing: any) => ({
+          id: new Types.ObjectId(ing.id),
+          stockLevel: {
+            unit: Types.Decimal128.fromString(ing.stockLevel.unit.toString()),
+            unitSymbol: ing.stockLevel.unitSymbol
+          }
+        }))
+      });
 
-    return res.status(201).json({
-      msg: `${name} Menu Item created!`,
-      data: newMenuItem
+      await newMenuItem.save();
+
+      return res.status(201).json({
+        msg: `${name} Menu Item created!`,
+        data: newMenuItem
+      });
     });
   } catch (e) {
     console.error(e);
+    // Clean up uploaded file in case of error
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 }
+
+// export const addMenuItem = async (req: Request, res: Response) => {
+//   try {
+//     const { name, price, des, ingredients = [] } = req.body;
+//
+//     // Validate ingredients exist
+//     if (ingredients.length > 0) {
+//       const ingredientIds = ingredients.map((ing: any) => ing.id);
+//       const existingIngredients = await Ingredient.find({ _id: { $in: ingredientIds } });
+//
+//       if (existingIngredients.length !== ingredientIds.length) {
+//         return res.status(400).json({ msg: "Some ingredients do not exist" });
+//       }
+//     }
+//
+//     const newMenuItem = new MenuItem({
+//       name,
+//       des: des,
+//       price: Types.Decimal128.fromString(price.toString()),
+//       ingredients: ingredients.map((ing: any) => ({
+//         id: new Types.ObjectId(ing.id),
+//         stockLevel: {
+//           unit: Types.Decimal128.fromString(ing.stockLevel.unit.toString()),
+//           unitSymbol: ing.stockLevel.unitSymbol
+//         }
+//       }))
+//     });
+//
+//     await newMenuItem.save();
+//
+//     return res.status(201).json({
+//       msg: `${name} Menu Item created!`,
+//       data: newMenuItem
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     return res.status(500).json({ msg: "Internal Server Error" });
+//   }
+// }
 
 export const getMenuItemById = async (req: Request, res: Response) => {
   try {

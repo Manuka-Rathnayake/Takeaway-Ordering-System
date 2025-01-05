@@ -5,32 +5,22 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useMenuStore } from '@/Store/useMenuStore'
 import { EditMenuItemForm } from '@/components/ui/Admindashboard/Menumanagement/edit-menu-item-form'
+import { IMenuItem } from '@/types/types'
+import api from '@/utils/axios'
 
-interface MenuItem {
-  id: string
-  name: string
-  description?: string
-  price: number
-  image: string | File
-  ingredients: {
-    name: string
-    unit: number
-    unitSymbol: string
-  }[]
-}
 
 interface MenuItemCardProps {
-  item: MenuItem
+  item: IMenuItem
 }
 
 export function MenuItemCard({ item }: MenuItemCardProps) {
   const [showDetails, setShowDetails] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
-  const deleteMenuItem = useMenuStore((state) => state.deleteMenuItem)
+  const { deleteMenuItem } = useMenuStore();
 
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this item?')) {
-      await deleteMenuItem(item.id)
+      await deleteMenuItem(item._id)
     }
   }
 
@@ -38,9 +28,9 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
     <>
       <Card className="overflow-hidden">
         <div className="relative h-48">
-          {item.image && (
+          {item.imagePath && (
             <img
-              src={typeof item.image === 'string' ? item.image : URL.createObjectURL(item.image)}
+              src={`${api.defaults.baseURL}${item.imagePath}`}
               alt={item.name}
               className="w-full h-full object-cover"
             />
@@ -50,8 +40,8 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
           <div className="flex justify-between items-start">
             <div>
               <h3 className="font-semibold text-lg">{item.name}</h3>
-              <p className="text-sm text-muted-foreground">{item.description}</p>
-              <p className="mt-2 font-bold text-green-600">${item.price.toFixed(2)}</p>
+              <p className="text-sm text-muted-foreground">{item.des}</p>
+              <p className="mt-2 font-bold text-green-600">${item.price.$numberDecimal}</p>
             </div>
             <div className="flex gap-2">
               <Button
@@ -88,30 +78,30 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
             <DialogTitle>{item.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {item.image && (
+            {item.imagePath && (
               <img
-                src={typeof item.image === 'string' ? item.image : URL.createObjectURL(item.image)}
+                src={typeof item.imagePath === 'string' ? `${api.defaults.baseURL}${item.imagePath}` : URL.createObjectURL(item.imagePath)}
                 alt={item.name}
                 className="w-full h-48 object-cover rounded-md"
               />
             )}
             <div>
               <h4 className="font-semibold">Description</h4>
-              <p className="text-muted-foreground">{item.description}</p>
+              <p className="text-muted-foreground">{item.des}</p>
             </div>
             <div>
               <h4 className="font-semibold">Ingredients</h4>
               <ul className="list-disc list-inside">
                 {item.ingredients.map((ingredient, index) => (
                   <li key={index}>
-                    {ingredient.unit} {ingredient.unitSymbol} {ingredient.name}
+                    {ingredient.stockLevel.unit.$numberDecimal} {ingredient.stockLevel.unitSymbol} {ingredient.id.name}
                   </li>
                 ))}
               </ul>
             </div>
             <div>
               <h4 className="font-semibold">Price</h4>
-              <p className="text-green-600">${item.price.toFixed(2)}</p>
+              <p className="text-green-600">${item.price.$numberDecimal}</p>
             </div>
           </div>
         </DialogContent>
@@ -123,7 +113,7 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
             <DialogTitle>Edit Menu Item</DialogTitle>
           </DialogHeader>
           <EditMenuItemForm
-            id={item.id}
+            id={item._id}
             initialData={item}
             onSubmit={() => setShowEditForm(false)}
           />

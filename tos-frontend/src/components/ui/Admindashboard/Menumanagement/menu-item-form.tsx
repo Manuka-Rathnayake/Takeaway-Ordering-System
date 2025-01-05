@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useIngredientStore } from '@/Store/useingredientsStore'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -32,9 +33,11 @@ const formSchema = z.object({
 })
 
 interface MenuItemIngredient {
-  name: string
-  unit: number
-  unitSymbol: string
+  id: string
+  stockLevel: {
+    unit: number
+    unitSymbol: string
+  }
 }
 
 interface MenuItemFormProps {
@@ -52,12 +55,18 @@ interface MenuItemFormProps {
 const unitSymbols = ['g', 'kg', 'ml', 'l', 'pcs', 'oz', 'lb', 'cup', 'tbsp', 'tsp']
 
 export function MenuItemForm({ initialData, onSubmit }: MenuItemFormProps) {
-  const [ingredients, setIngredients] = useState<MenuItemIngredient[]>(
+  const [ingredientsdata, setIngredients] = useState<MenuItemIngredient[]>(
     initialData?.ingredients || []
   )
   const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image ? (typeof initialData.image === 'string' ? initialData.image : URL.createObjectURL(initialData.image)) : null)
   const addMenuItem = useMenuStore((state) => state.addMenuItem)
   const updateMenuItem = useMenuStore((state) => state.updateMenuItem)
+
+  const { ingredients, fetchIngredients } = useIngredientStore();
+
+  useEffect(() => {
+    fetchIngredients()
+  }, [fetchIngredients])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -73,14 +82,15 @@ export function MenuItemForm({ initialData, onSubmit }: MenuItemFormProps) {
   })
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log(values)
     const formData = new FormData()
     formData.append('name', values.name)
-    formData.append('description', values.description || '')
+    formData.append('des', values.description || '')
     formData.append('price', values.price.toString())
     if (values.image) {
       formData.append('image', values.image)
     }
-    formData.append('ingredients', JSON.stringify(ingredients))
+    formData.append('ingredients', JSON.stringify(ingredientsdata))
 
     if (initialData) {
       await updateMenuItem(initialData.id, formData)
@@ -92,21 +102,43 @@ export function MenuItemForm({ initialData, onSubmit }: MenuItemFormProps) {
 
   const addIngredient = () => {
     setIngredients([
-      ...ingredients,
-      { name: '', unit: 0, unitSymbol: '' },
+      ...ingredientsdata,
+      { id: '', stockLevel: { unit: 0, unitSymbol: '' } },
     ])
   }
 
   const removeIngredient = (index: number) => {
-    setIngredients(ingredients.filter((_, i) => i !== index))
+    setIngredients(ingredientsdata.filter((_, i) => i !== index))
   }
 
-  const updateIngredient = (index: number, field: keyof MenuItemIngredient, value: string | number) => {
-    const updated = [...ingredients]
-    updated[index] = { ...updated[index], [field]: value }
-    setIngredients(updated)
-  }
-
+  // const updateIngredient = (index: number, field: keyof MenuItemIngredient, value: string | number) => {
+  //   const updated = [...ingredients]
+  //   updated[index] = { ...updated[index], [field]: value }
+  //   setIngredients(updated)
+  // }
+  const updateIngredient = (
+    index: number,
+    field: keyof MenuItemIngredient | 'stockLevel.unit' | 'stockLevel.unitSymbol',
+    value: string | number
+  ) => {
+    const updated = [...ingredientsdata];
+    if (field.startsWith('stockLevel.')) {
+      const nestedField = field.split('.')[1]; // Get 'unit' or 'unitSymbol'
+      updated[index] = {
+        ...updated[index],
+        stockLevel: {
+          ...updated[index].stockLevel,
+          [nestedField]: value,
+        },
+      };
+    } else {
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+    }
+    setIngredients(updated);
+  };
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -173,7 +205,7 @@ export function MenuItemForm({ initialData, onSubmit }: MenuItemFormProps) {
           <FormField
             control={form.control}
             name="image"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormLabel>Image</FormLabel>
                 <FormControl>
@@ -195,33 +227,50 @@ export function MenuItemForm({ initialData, onSubmit }: MenuItemFormProps) {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">Ingredients</h3>
-              <Button type="button" onClick={addIngredient}>
+              <Button type="button" onClick={addIngredient} className='bg-[#EF4444] text-white'>
                 Add Ingredient
               </Button>
             </div>
 
-            {ingredients.map((ingredient, index) => (
+            {ingredientsdata.map((ingredient, index) => (
               <div key={index} className="flex gap-4 items-start">
-                <Input
-                  placeholder="Ingredient Name"
-                  value={ingredient.name}
-                  onChange={(e) =>
-                    updateIngredient(index, 'name', e.target.value)
-                  }
-                  className="transition-all duration-200 ease-in-out focus:border-primary"
-                />
+                {/* <Input */}
+                {/*   placeholder="Ingredient Name" */}
+                {/*   value={ingredient.id} */}
+                {/*   onChange={(e) => */}
+                {/*     updateIngredient(index, 'id', e.target.value) */}
+                {/*   } */}
+                {/*   className="transition-all duration-200 ease-in-out focus:border-primary" */}
+                {/* /> */}
+
+                <Select
+                  value={ingredient.id}
+                  onValueChange={(value) => updateIngredient(index, 'id', value)}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a ingredient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ingredients.map((ingredient) => (
+                      <SelectItem key={ingredient._id} value={ingredient._id}>
+                        {ingredient.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Input
                   type="number"
                   placeholder="Unit"
-                  value={ingredient.unit}
+                  value={ingredient.stockLevel.unit}
                   onChange={(e) =>
-                    updateIngredient(index, 'unit', parseFloat(e.target.value))
+                    updateIngredient(index, 'stockLevel.unit', parseFloat(e.target.value))
                   }
                   className="transition-all duration-200 ease-in-out focus:border-primary"
                 />
                 <Select
-                  value={ingredient.unitSymbol}
-                  onValueChange={(value) => updateIngredient(index, 'unitSymbol', value)}
+                  value={ingredient.stockLevel.unitSymbol}
+                  onValueChange={(value) => updateIngredient(index, 'stockLevel.unitSymbol', value)}
                 >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Unit Symbol" />
@@ -246,7 +295,7 @@ export function MenuItemForm({ initialData, onSubmit }: MenuItemFormProps) {
             ))}
           </div>
 
-          <Button type="submit">
+          <Button type="submit" className='bg-[#EF4444] text-white'>
             {initialData ? 'Update Menu Item' : 'Add Menu Item'}
           </Button>
         </form>

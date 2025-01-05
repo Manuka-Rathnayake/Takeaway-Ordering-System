@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Order, MenuItem, Ingredient } from "../db/schema";
 import { startSession, Types } from "mongoose";
 import { getOrdersByStatus } from "./dbhandler";
+import { WSclient } from "../utils/wsutil";
 
 export const getAllOrders = async (req: Request, res: Response) => {
   try {
@@ -101,7 +102,7 @@ export const addOrder = async (req: Request, res: Response) => {
       customerNumber,
       customerName,
       status = "pending",
-      statusKitchen = "queued",
+      statusKitchen = "pending",
       discount = 0,
       menuItem,
       isPaid,
@@ -128,12 +129,12 @@ export const addOrder = async (req: Request, res: Response) => {
       if (!menuItemDetail) {
         return res.status(400).json({ msg: `Menu item with ID ${item.id} not found` });
       }
-
       // Add null checks and type conversion
       const itemPrice = menuItemDetail.price
-        ? parseFloat(menuItemDetail.price.toString() || '0')
+        ? Number(menuItemDetail.price.toString() || '0')
         : 0;
-      const itemQuantity = item.quntity ? parseFloat(item.quntity.toString()) : 0;
+      const itemQuantityStr = item.quantity.toString()
+      const itemQuantity = Number(itemQuantityStr);
 
       // Validate price and quantity
       if (isNaN(itemPrice) || isNaN(itemQuantity)) {
@@ -188,7 +189,6 @@ export const addOrder = async (req: Request, res: Response) => {
         msg: "Insufficient or concurrent modification of ingredient stock"
       });
     }
-
     // Create the order
     const newOrder = new Order({
       customerNumber,
@@ -213,8 +213,14 @@ export const addOrder = async (req: Request, res: Response) => {
 
     // Save the order
     const createOrder = await newOrder.save();
-    console.log(createOrder)
 
+
+    WSclient.broadcast(["kitchen", "admin", "cashier"], "notification", {
+      level: "",
+      topic: "New Order placed",
+      msg: `${createOrder._id} placed!`
+    });
+    WSclient.broadcast(["kitchen", "admin", "cashier"], "refresh-order", {})
     return res.status(201).json({
       msg: "Order created successfully!",
       data: newOrder
@@ -304,6 +310,11 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       return res.status(404).json({ msg: "Order not found" });
     }
 
+    WSclient.broadcast(["kitchen", "admin", "cashier"], "notification", {
+      level: "",
+      topic: "Order Updated",
+      msg: `${order._id} order state change to ${order.status}!`
+    });
     return res.status(200).json({
       msg: "Order status updated successfully",
       data: order
@@ -473,3 +484,64 @@ export const getOrderStatusHandler = async (req: Request<{}, {}, IgetOrderStatus
     });
   }
 };
+
+export const getPaidOrderHandler = async (req: Request, res: Response) => {
+  // try {
+  //   const paidOrders = await Order.find({ "payment.isPaid": true });
+  //   res.status(200).json({ success: true, data: paidOrders });
+  // } catch (error) {
+  //   console.error("Error fetching paid orders:", error);
+  //   res.status(500).json({ success: false, message: "Failed to fetch paid orders" });
+  // }
+  try {
+    const paidOrders = await Order.find({ "payment.isPaid": true }).populate({
+      path: "menuItem.id",
+      model: "menuitems",
+      select: "name price",
+    }).populate({
+      path: "payment.user",
+      model: "users",
+      select: "username email",
+    });
+    res.status(200).json({ success: true, data: paidOrders });
+  } catch (error) {
+    console.error("Error fetching paid orders:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch paid orders." });
+  }
+}
+
+export const getTodayOrderHandler = async (req: Request, res: Response) => {
+  try {
+    // Get the current date
+    const now = new Date();
+
+    // Calculate the start of the day (00:00:00)
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+
+    // Calculate the end of the day (23:59:59.999)
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    // Fetch orders created today
+    const todayOrders = await Order.find({
+      createdAt: { $gte: todayStart, $lte: todayEnd }
+    }).populate({
+      path: "menuItem.id",
+      populate: {
+        path: "ingredients.id",
+        model: "ingredients"
+      }
+    }).exec();
+
+    // Send response
+    return res.status(200).json({
+      msg: "Today's orders retrieved successfully!",
+      data: todayOrders
+    });
+  } catch (error) {
+    console.error("Error fetching today's orders:", error);
+    return res.status(500).json({
+      msg: "Internal Server Error",
+      error: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+}

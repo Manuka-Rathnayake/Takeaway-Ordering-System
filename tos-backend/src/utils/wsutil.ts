@@ -7,7 +7,7 @@ interface wsusers {
 }
 
 
-export class WSclientQueue {
+class WSclientQueue {
   private users: wsusers[];
 
   constructor() {
@@ -15,7 +15,7 @@ export class WSclientQueue {
   }
 
   broadcast(sections: string[], eventType: string, data: any) {
-    const message = JSON.stringify({ type: eventType, data });
+    const message = JSON.stringify({ type: eventType, payload: data });
 
     this.users
       .filter(user => sections.includes(user.section))

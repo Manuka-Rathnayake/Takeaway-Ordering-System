@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export const EditUserSchema = z.object({
+  username: z.string(),
+  email: z.string().email(),
+  phonenumber: z.string(),
+  role: z.string(),
+  nic: z.string(),
+});
 
 export const RegisterSchema = z.object({
   username: z.string(),

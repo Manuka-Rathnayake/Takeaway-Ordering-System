@@ -1,5 +1,12 @@
 
+export interface INotifiData {
+  level: "NORMAL" | "ERROR" | "WARNNIG",
+  topic: string,
+  msg: string,
+};
+
 export interface INotification {
+  id: string,
   level: "NORMAL" | "ERROR" | "WARNNIG",
   topic: string,
   msg: string,
@@ -17,8 +24,8 @@ export type DecimalType = {
 };
 
 export interface IUnitData {
-  unit: number;
-  warningLevel?: number;
+  unit: DecimalType;
+  warningLevel?: DecimalType;
   unitSymbol: string
 }
 
@@ -43,6 +50,7 @@ export interface IMenuItem {
   _id: string;
   name: string;
   des: string;
+  imagePath?: string;
   price: DecimalType;
   ingredients: IMenuItemIngredient[];
   createdAt: string;

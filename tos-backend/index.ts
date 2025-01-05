@@ -15,6 +15,7 @@ import ingredientsRoute from './src/routes/ingredients';
 import menuItemRoute from './src/routes/menuItem';
 import orderRoute from './src/routes/order';
 import stockUpdateRoute from './src/routes/stockUpdate';
+import path from 'path';
 
 dotenv.config();
 connectDB();
@@ -31,6 +32,7 @@ app.use(cors({
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(cookieParser())
+app.use('/uploads', express.static("uploads"))
 // app.use(authMiddleware)
 
 

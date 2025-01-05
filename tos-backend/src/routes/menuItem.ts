@@ -8,7 +8,6 @@ const menuItemRoute = Router();
 menuItemRoute.get('/all', getAllMenuItems);
 menuItemRoute.get('/:id', getMenuItemById);
 menuItemRoute.post('/add',
-  validateData(AddMenuItemSchema),
   addMenuItem
 );
 menuItemRoute.put('/:id',

@@ -1,5 +1,7 @@
 import { create } from "zustand";
-import { INotification, IOrder, WSSender } from "./types/types";
+import { INotification, INotifiData, IOrder, WSSender } from "./types/types";
+import api from "./utils/axios";
+import { v4 as uuidv4 } from 'uuid';
 
 type AppStore = {
   completeOrder: IOrder[];
@@ -11,8 +13,11 @@ type AppStore = {
   changeOrderStateForward: (order: IOrder) => Promise<void>
   getOrderById: (id: string) => IOrder | undefined
   getOrdersByStatus: (status: string) => IOrder[]
-  addNotification: (notify: INotification) => Promise<void>
-  refreshOrder: (orders: IOrder[]) => Promise<void>
+  addNotification: (notify: INotifiData) => Promise<void>
+  refreshOrder: () => Promise<void>
+  changeOrderState: (id: string, state: string) => Promise<void>
+  clearNotification: () => Promise<void>
+  removeNotification: (id: string) => Promise<void>
 };
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -28,9 +33,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
           return { pendingOrder: [order, ...state.pendingOrder] }
         case "processing":
           return { processingOrder: [order, ...state.processingOrder] }
-        case "complete":
+        case "completed":
           return { completeOrder: [order, ...state.completeOrder] }
-        case "cancle":
+        case "cancelled":
           return { cancleOrder: [order, ...state.cancleOrder] }
         default:
           return state
@@ -114,18 +119,66 @@ export const useAppStore = create<AppStore>((set, get) => ({
         return [];
     }
   },
-  addNotification: async (notify: INotification) => {
-    set(state => ({
-      notification: [...state.notification, notify]
-    }))
+  addNotification: async (notify: INotifiData) => {
+    if (notify.topic || notify.msg) {
+      const { notification } = get();
+      const isDuplicate = notification.some(
+        (nt) => nt.topic === notify.topic && nt.msg === notify.msg
+      );
+
+      if (!isDuplicate) {
+        const nt: INotification = {
+          id: uuidv4(),
+          level: notify.level,
+          topic: notify.topic,
+          msg: notify.msg,
+        };
+        set((state) => ({
+          notification: [...state.notification, nt],
+        }));
+      } else {
+        console.log("Duplicate notification ignored:", notify);
+      }
+    }
   },
-  refreshOrder: async (orders: IOrder[]) => {
+  refreshOrder: async () => {
+    const res = await api.get('/orders/todayorder')
+    const orders: IOrder[] = res.data.data
     set({
       pendingOrder: orders.filter(order => order.status === "pending"),
       processingOrder: orders.filter(order => order.status === "processing"),
-      completeOrder: orders.filter(order => order.status === "complete"),
-      cancleOrder: orders.filter(order => order.status === "cancle"),
+      completeOrder: orders.filter(order => order.status === "completed"),
+      cancleOrder: orders.filter(order => order.status === "cancelled"),
     });
+  },
+  changeOrderState: async (id: string, state: string) => {
+    try {
+      // Send an API request to update the order's state
+      const res = await api.put(`/orders/status/${id}`, {
+        status: state,
+        statusKitchen: state
+      });
+
+      // Check if the API call was successful
+      if (res.status === 200) {
+        console.log(`Order ${id} updated successfully to state: ${state}`);
+
+        // Refresh the orders in the local store
+        await get().refreshOrder();
+      } else {
+        console.error(`Failed to update order ${id}:`, res.data);
+      }
+    } catch (error) {
+      console.error(`Error updating order ${id} state:`, error);
+    }
+  },
+  clearNotification: async () => {
+    set({ notification: [] })
+  },
+  removeNotification: async (id: string) => {
+    set((state) => ({
+      notification: state.notification.filter((notification) => notification.id !== id)
+    }));
   }
 }));
 
@@ -136,7 +189,7 @@ type WebSocketStore = {
   connect: (url: string) => void;
   disconnect: () => void;
   sendMessage: (message: WSSender) => void;
-  lastNotification: INotification | null;
+  lastNotification: INotifiData | null;
 };
 
 export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
@@ -158,17 +211,24 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
     socket.onopen = () => {
       console.log('WebSocket connection established');
       set({ connectionStatus: 'connected', socket });
+      const { refreshOrder } = useAppStore.getState();
+      refreshOrder().then(() => {
+        console.log("orders data refreshed")
+      })
+
     };
 
     // Listen for messages
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-
         // Handle different types of messages
         if (data.type === 'notification') {
-          const notification: INotification = data.payload;
+          const { addNotification } = useAppStore.getState();
+          const notification: INotifiData = data.payload;
 
+          console.log(data.payload)
+          addNotification(notification)
           // Update store with last notification
           set({ lastNotification: notification });
 
@@ -183,12 +243,12 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
               // icon: notification.icon // If you have an icon
             });
           }
-        } else if (data.type == 'add-Order') {
+        } else if (data.type == 'add-order') {
           const { addOrder } = useAppStore.getState();
           addOrder(data.data)
-        } else if (data.type == 'refresh-Order') {
+        } else if (data.type == 'refresh-order') {
           const { refreshOrder } = useAppStore.getState();
-          refreshOrder(data.data)
+          refreshOrder()
         } else if (data.type == 'state-order') {
           const { changeOrderStateForward } = useAppStore.getState();
           changeOrderStateForward(data.data)

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const UnitSymbol = ["gram", "kilogram", "liter", "mililiter", "ton", "pound", "packet"] as const;
+export const UnitSymbol = ["gram", "kilogram", "liter", "mililiter", "ton", "pound", "packet", "kg", "l", "g", "ml"] as const;
 
 export const AddIngredientSchema = z.object({
   name: z.string(),

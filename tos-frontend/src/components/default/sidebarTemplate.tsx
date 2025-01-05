@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 import { create } from 'zustand';
 import { WebSocketManager } from '@/utils/ws';
+import NotificationDropdown from './notificationPanel';
 
 // Generic type for navigation items
 interface NavigationItem {
@@ -100,7 +101,7 @@ const NavSidebarLayout: React.FC<NavSidebarProps> = ({
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
@@ -193,15 +194,15 @@ const NavSidebarLayout: React.FC<NavSidebarProps> = ({
           {/* Icons */}
           <div className="flex items-center space-x-4">
             <div> <WebSocketManager /> </div>
-            <div className="relative cursor-pointer">
-              <FaBell className="text-gray-600 text-xl" />
-              {notifications > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {notifications}
-                </span>
-              )}
-            </div>
-            <FaCog className="text-gray-600 text-xl cursor-pointer" />
+            <NotificationDropdown />
+            {/* <div className="relative cursor-pointer"> */}
+            {/*   <FaBell className="text-gray-600 text-xl" /> */}
+            {/*   {notifications > 0 && ( */}
+            {/*     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"> */}
+            {/*       {notifications} */}
+            {/*     </span> */}
+            {/*   )} */}
+            {/* </div> */}
             <img
               src="https://via.placeholder.com/40"
               alt="User Avatar"
@@ -211,7 +212,7 @@ const NavSidebarLayout: React.FC<NavSidebarProps> = ({
         </div>
 
         {/* Page Content */}
-        <div className="p-6">
+        <div className="p-6 ">
           <Outlet />
         </div>
       </div>

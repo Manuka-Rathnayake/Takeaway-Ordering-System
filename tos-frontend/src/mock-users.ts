@@ -1,4 +1,4 @@
-import { User } from '../store/useUserStore'
+import { User } from '@/Store/useUserStore'
 
 export const mockUsers: User[] = [
   {

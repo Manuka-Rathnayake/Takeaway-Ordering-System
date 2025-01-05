@@ -1,23 +1,10 @@
 import { create } from 'zustand'
-import menuItemsData from '@/menu-item.json'
+import { IMenuItem } from '@/types/types'
+import api from '@/utils/axios'
 
-interface Ingredient {
-  name: string
-  unit: number
-  unitSymbol: string
-}
-
-interface MenuItem {
-  id: string
-  name: string
-  description?: string
-  price: number
-  image: string | File
-  ingredients: Ingredient[]
-}
 
 interface MenuStore {
-  menuItems: MenuItem[]
+  menuItems: IMenuItem[]
   loading: boolean
   error: string | null
   fetchMenuItems: () => Promise<void>
@@ -26,7 +13,7 @@ interface MenuStore {
   deleteMenuItem: (id: string) => Promise<void>
 }
 
-export const useMenuStore = create<MenuStore>((set) => ({
+export const useMenuStore = create<MenuStore>((set, get) => ({
   menuItems: [],
   loading: false,
   error: null,
@@ -34,10 +21,12 @@ export const useMenuStore = create<MenuStore>((set) => ({
   fetchMenuItems: async () => {
     set({ loading: true, error: null })
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      set({ menuItems: menuItemsData, loading: false })
+      const res = await api.get('/menuitems/all')
+      const data: IMenuItem[] = res.data.data;
+
+      set({ menuItems: data, loading: false })
     } catch (error) {
+      console.log(error)
       set({ error: 'Failed to fetch menu items', loading: false, menuItems: [] })
     }
   },
@@ -45,21 +34,15 @@ export const useMenuStore = create<MenuStore>((set) => ({
   addMenuItem: async (formData: FormData) => {
     set({ loading: true, error: null })
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      const newItem: MenuItem = {
-        id: Date.now().toString(),
-        name: formData.get('name') as string,
-        description: formData.get('description') as string,
-        price: parseFloat(formData.get('price') as string),
-        image: formData.get('image') as File,
-        ingredients: JSON.parse(formData.get('ingredients') as string),
-      }
-      set((state) => ({
-        menuItems: [...state.menuItems, newItem],
-        loading: false
-      }))
+      const { fetchMenuItems } = get();
+      await api.post('/menuitems/add', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      fetchMenuItems()
     } catch (error) {
+      console.log(error)
       set({ error: 'Failed to add menu item', loading: false })
     }
   },
@@ -67,24 +50,10 @@ export const useMenuStore = create<MenuStore>((set) => ({
   updateMenuItem: async (id: string, formData: FormData) => {
     set({ loading: true, error: null })
     try {
+      console.log(formData)
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      set((state) => ({
-        menuItems: state.menuItems.map((menuItem) =>
-          menuItem.id === id
-            ? {
-                ...menuItem,
-                name: formData.get('name') as string,
-                description: formData.get('description') as string,
-                price: parseFloat(formData.get('price') as string),
-                image: formData.get('image') as File || menuItem.image,
-                ingredients: JSON.parse(formData.get('ingredients') as string),
-              }
-            : menuItem
-        ),
-        loading: false
-      }))
     } catch (error) {
+      console.log(error)
       set({ error: 'Failed to update menu item', loading: false })
     }
   },
@@ -92,14 +61,14 @@ export const useMenuStore = create<MenuStore>((set) => ({
   deleteMenuItem: async (id: string) => {
     set({ loading: true, error: null })
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      set((state) => ({
-        menuItems: state.menuItems.filter((item) => item.id !== id),
-        loading: false
-      }))
+      const { fetchMenuItems } = get();
+      await api.delete(`/menuitems/${id}`)
+      fetchMenuItems()
     } catch (error) {
+      console.log(error)
       set({ error: 'Failed to delete menu item', loading: false })
+    } finally {
+      set({ loading: false })
     }
   }
 }))

@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 // import mongoose, { MongooseError } from "mongoose";
 // import { handleMongooseError } from "../utils/ErrorHandle";
 import JsonWebToken from "jsonwebtoken";
+import { EditUserSchema, RegisterSchema } from "../schema/auth";
 
 export const Register = async (req: Request<{}, {}, IUsers>, res: Response) => {
   try {
@@ -79,6 +80,59 @@ export const Login = async (req: Request<{}, {}, LoginReq>, res: Response) => {
     return res.status(500).json({ msg: "Internal Server" })
   }
 }
+
+export const updateUser = async (req: Request<{ id: string }>, res: Response) => {
+  try {
+    // Validate the request body
+    const validatedData = EditUserSchema.parse(req.body);
+
+    // Hash password if it is being updated
+    // if (validatedData.password) {
+    //   validatedData.password = await bcrypt.hash(validatedData.password, 10);
+    // }
+
+    const updatedUser = await Users.findByIdAndUpdate(req.params.id, validatedData, {
+      new: true, // Return the updated document
+      runValidators: true, // Run schema validation
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    return res.status(200).json({ msg: "User updated successfully", user: updatedUser });
+  } catch (e: any) {
+    console.log(e);
+    return res.status(400).json({ msg: e.message || "Invalid request" });
+  }
+};
+
+export const deleteUser = async (req: Request<{ id: string }>, res: Response) => {
+  try {
+    const deletedUser = await Users.findByIdAndDelete(req.params.id);
+
+    if (!deletedUser) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    return res.status(200).json({ msg: "User deleted successfully", user: deletedUser });
+  } catch (e: any) {
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
+
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    // Fetch all users, excluding the password field
+    const users = await Users.find().select("-password");
+
+    return res.status(200).json({ users });
+  } catch (e: any) {
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
 
 //
 // try {

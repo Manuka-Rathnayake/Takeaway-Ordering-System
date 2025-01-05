@@ -10,10 +10,13 @@ import {
   FaBell,
   FaCog,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaLeaf
 } from 'react-icons/fa';
 import axios from 'axios';
 import { create } from 'zustand';
+import NotificationDropdown from '@/components/default/notificationPanel';
+import { WebSocketManager } from '@/utils/ws';
 
 interface NavigationItem {
   name: string;
@@ -53,6 +56,11 @@ const AdminLayout: React.FC = () => {
       icon: FaClipboardList,
     },
     {
+      name: 'Ingredients Stock',
+      path: '/admin/ingredients',
+      icon: FaLeaf,
+    },
+    {
       name: 'Stock Management',
       path: '/admin/stockmanagement',
       icon: FaShoppingBag,
@@ -89,14 +97,14 @@ const AdminLayout: React.FC = () => {
     <div className="flex h-screen">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
           onClick={toggleSidebar}
         />
       )}
 
       {/* Sidebar */}
-      <div 
+      <div
         className={`
           fixed md:static z-50 top-0 left-0 w-64 h-full 
           bg-white border-r border-gray-200 
@@ -107,9 +115,9 @@ const AdminLayout: React.FC = () => {
       >
         <div className="p-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Logo</h1>
-          
+
           {/* Mobile Close Button */}
-          <button 
+          <button
             className="md:hidden"
             onClick={toggleSidebar}
           >
@@ -122,11 +130,10 @@ const AdminLayout: React.FC = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center px-6 py-3 transition-colors ${
-                location.pathname === item.path
-                  ? 'bg-red-50 text-red-500'
-                  : 'text-gray-600 hover:text-red-500 hover:bg-red-100'
-              }`}
+              className={`flex items-center px-6 py-3 transition-colors ${location.pathname === item.path
+                ? 'bg-red-50 text-red-500'
+                : 'text-gray-600 hover:text-red-500 hover:bg-red-100'
+                }`}
               onClick={() => {
                 setActiveItem(item.name);
                 setIsSidebarOpen(false); // Close sidebar on mobile after selection
@@ -163,7 +170,7 @@ const AdminLayout: React.FC = () => {
         {/* Navbar */}
         <div className="flex items-center justify-between p-4 bg-white shadow-md">
           {/* Mobile Menu Toggle */}
-          <button 
+          <button
             className="md:hidden mr-4"
             onClick={toggleSidebar}
           >
@@ -184,15 +191,16 @@ const AdminLayout: React.FC = () => {
 
           {/* Icons */}
           <div className="flex items-center space-x-4">
+            <div> <WebSocketManager /> </div>
             <div className="relative cursor-pointer">
-              <FaBell className="text-gray-600 text-xl" />
-              {notifications > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {notifications}
-                </span>
-              )}
+              <NotificationDropdown />
+              {/* <FaBell className="text-gray-600 text-xl" /> */}
+              {/* {notifications > 0 && ( */}
+              {/*   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"> */}
+              {/*     {notifications} */}
+              {/*   </span> */}
+              {/* )} */}
             </div>
-            <FaCog className="text-gray-600 text-xl cursor-pointer" />
             <img
               src="https://via.placeholder.com/40"
               alt="User Avatar"
