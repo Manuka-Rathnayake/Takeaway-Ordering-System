@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
   FaHome,
   FaClipboardList,
@@ -9,16 +9,22 @@ import {
   FaBars,
   FaTimes,
   FaLeaf,
-  FaUserCircle,
-  FaSignOutAlt,
-  FaUsers,
-  FaShoppingBag
+  FaUserCircle
 } from 'react-icons/fa';
+import axios from 'axios';
+import { create } from 'zustand';
 
 interface NavigationItem {
   name: string;
   path: string;
   icon: React.ElementType;
+}
+
+interface NavigationState {
+  activeItem: string;
+  setActiveItem: (item: string) => void;
+  notifications: number;
+  setNotifications: (count: number) => void;
 }
 
 interface Notification {
@@ -27,7 +33,15 @@ interface Notification {
   timestamp: string;
 }
 
-const Layout: React.FC = () => {
+const useNavigationStore = create<NavigationState>((set) => ({
+  activeItem: 'Dashboard',
+  setActiveItem: (item) => set({ activeItem: item }),
+  notifications: 0,
+  setNotifications: (count) => set({ notifications: count }),
+}));
+
+const CashierLayout: React.FC = () => {
+  const { activeItem, setActiveItem, notifications, setNotifications } = useNavigationStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -36,40 +50,42 @@ const Layout: React.FC = () => {
   const location = useLocation();
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
 
   const navItems: NavigationItem[] = [
     {
-      name: 'Dashboard',
-      path: '/admin',
+      name: 'CashierDashboard',
+      path: 'adminlayout',
       icon: FaHome,
     },
     {
-      name: 'Menu Management',
-      path: '/admin/menumanagement',
+      name: 'Orders',
+      path: 'orders',
       icon: FaClipboardList,
     },
     {
-      name: 'Ingredients Stock',
-      path: '/admin/ingredients',
+      name: 'Menu',
+      path: 'menu',
       icon: FaLeaf,
     },
     {
-      name: 'Stock Management',
-      path: '/admin/stockmanagement',
-      icon: FaShoppingBag,
-    },
-    {
-      name: 'User Management',
-      path: '/admin/usermanagement',
-      icon: FaUsers,
-    },
-    {
-      name: 'Order History',
-      path: '/admin/orderhistory',
+      name: 'History',
+      path: 'history',
       icon: FaHistory,
     }
   ];
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await axios.get('/api/notifications');
+        setNotifications(response.data.count);
+        setNotificationList(response.data.notifications || []);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+    fetchNotifications();
+  }, [setNotifications]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -86,11 +102,12 @@ const Layout: React.FC = () => {
   }, []);
 
   const handleSignOut = () => {
+    // Add your sign out logic here
     console.log('Signing out...');
   };
 
-  const handleAddMenu = () => {
-    navigate('/admin/menumanagement');
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   return (
@@ -99,7 +116,7 @@ const Layout: React.FC = () => {
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={toggleSidebar}
         />
       )}
 
@@ -116,15 +133,16 @@ const Layout: React.FC = () => {
         <div className="p-6 flex items-center justify-between">
           <Link to="/" className="flex items-center">
             <img 
-              src="/Logo.png" 
+              src="Logo.png" 
               alt="Company Logo"
-              className="w-auto object-contain"
+              className="w-auto  object-contain"
             />
           </Link>
           
+          {/* Mobile Close Button */}
           <button 
             className="md:hidden"
-            onClick={() => setIsSidebarOpen(false)}
+            onClick={toggleSidebar}
           >
             <FaTimes className="w-6 h-6" />
           </button>
@@ -136,11 +154,14 @@ const Layout: React.FC = () => {
               key={item.path}
               to={item.path}
               className={`flex items-center px-6 py-3 transition-colors ${
-                location.pathname === item.path
+                location.pathname.includes(item.path)
                   ? 'bg-red-50 text-red-500'
                   : 'text-gray-600 hover:text-red-500 hover:bg-red-100'
               }`}
-              onClick={() => setIsSidebarOpen(false)}
+              onClick={() => {
+                setActiveItem(item.name);
+                setIsSidebarOpen(false);
+              }}
             >
               <item.icon className="w-5 h-5" />
               <span className="ml-3">{item.name}</span>
@@ -148,41 +169,22 @@ const Layout: React.FC = () => {
           ))}
         </nav>
 
-        {/* Menu Promotion Section */}
-        <div className="mx-6 mt-8">
-          <div className="bg-red-50 rounded-lg p-4">
-            <div className="flex flex-col items-center">
-              <img
-                src="/img1.png"
-                alt="Chef"
-                className="w-16 h-16 mb-2"
-              />
-              <p className="text-sm text-gray-600 text-center mb-4">
-                Please organize your menus through button below!
-              </p>
-              <button 
-                className="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center"
-                onClick={handleAddMenu}
-              >
-                <span className="mr-2">+</span>
-                Add Menu
-              </button>
-            </div>
-          </div>
-        </div>
+       
       </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Navbar */}
         <div className="flex items-center justify-between p-4 bg-white shadow-md">
+          {/* Mobile Menu Toggle */}
           <button 
             className="md:hidden mr-4"
-            onClick={() => setIsSidebarOpen(true)}
+            onClick={toggleSidebar}
           >
             <FaBars className="w-6 h-6" />
           </button>
 
+          {/* Search Bar */}
           <div className="flex items-center w-1/3 relative">
             <FaSearch className="absolute left-3 text-gray-500" />
             <input
@@ -194,6 +196,7 @@ const Layout: React.FC = () => {
             />
           </div>
 
+          {/* Icons */}
           <div className="flex items-center space-x-6">
             {/* Notifications */}
             <div className="relative" ref={notificationRef}>
@@ -202,13 +205,14 @@ const Layout: React.FC = () => {
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
               >
                 <FaBell className="text-gray-600 text-xl" />
-                {notificationList.length > 0 && (
+                {notifications > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    {notificationList.length}
+                    {notifications}
                   </span>
                 )}
               </button>
 
+              {/* Notification Dropdown */}
               {isNotificationOpen && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 z-50">
                   <h3 className="px-4 py-2 font-semibold border-b">Notifications</h3>
@@ -237,13 +241,13 @@ const Layout: React.FC = () => {
                 <FaUserCircle className="text-gray-600 text-2xl" />
               </button>
 
+              {/* Profile Dropdown */}
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
                   <button
                     onClick={handleSignOut}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                   >
-                    <FaSignOutAlt className="mr-2" />
                     <span>Sign Out</span>
                   </button>
                 </div>
@@ -253,7 +257,7 @@ const Layout: React.FC = () => {
         </div>
 
         {/* Page Content */}
-        <div className="p-6 bg-gray-100 flex-1">
+        <div className="p-6">
           <Outlet />
         </div>
       </div>
@@ -261,4 +265,4 @@ const Layout: React.FC = () => {
   );
 };
 
-export default Layout;
+export default CashierLayout;

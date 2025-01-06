@@ -2,12 +2,15 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import './App.css';
 import { MainLogin } from '@/pages/login';
 import Sidebar from '@/components/ui/Admindashboard/Sidebar';
+
 import { StockManagement } from '@/components/ui/Admindashboard/Stockmanegement/stockmanagement';
 import MenuManagement from '@/components/ui/Admindashboard/Menumanagement/menu-management'
 import Dashboard from './components/ui/Admindashboard/Dashboard/dashboard';
 import UserManagement from './components/ui/Admindashboard/Usermanagement/userman';
 import OrderHistory from './components/ui/Admindashboard/Orderhistory/order-history';
 import IngredientManagement from './components/ui/Admindashboard/Ingredients/Ingreidentsmanagement';
+import CashierLayout from './components/CashierDashboard/sidebar';
+import CashierDashboard from './components/CashierDashboard/cashierdashboard';
 
 function App() {
   return (
@@ -18,6 +21,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* Admin Routes */}
+
         <Route path="/admin" element={<Sidebar />}>
           <Route index element={<Dashboard />} />
           <Route path="menumanagement" element={<MenuManagement />} />
@@ -26,6 +30,12 @@ function App() {
           <Route path="usermanagement" element={<UserManagement />} />
           <Route path="orderhistory" element={<OrderHistory />} />
         </Route>
+
+        <Route path="/cashier" element={<CashierLayout />}>
+          <Route index element={<CashierDashboard />} />
+        </Route>
+
+        
       </Routes>
     </Router>
   );
