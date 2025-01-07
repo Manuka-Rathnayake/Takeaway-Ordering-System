@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import api from '@/utils/axios'
+import { useAuth } from '@/utils/authcontext'
+import { AxiosError } from 'axios'
 
 // Define login credentials (replace with actual authentication)
 // const LOGIN_CREDENTIALS = {
@@ -32,13 +34,13 @@ import api from '@/utils/axios'
 // }
 
 const formSchema = z.object({
-  type: z.enum(["kitchen", "menu", "admin", "cashier"], {
+  type: z.enum(["kitchen", "admin", "cashier"], {
     required_error: "Please select a login type.",
   }),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  password: z.string().min(4, {
+  password: z.string().min(3, {
     message: "Password must be at least 8 characters long.",
   }),
 })
@@ -47,13 +49,14 @@ const formSchema = z.object({
 
 // Main Login Component
 export function MainLogin() {
+  const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null)
   const navigate = useNavigate()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "menu",
+      type: undefined,
       email: "",
       password: "",
     },
@@ -72,65 +75,65 @@ export function MainLogin() {
 
         console.log(res)
 
-        if (res.status == 400) {
-          setServerError("Invalid Password !")
-        } else if (res.status == 404) {
-          setServerError("Email is Not Registered !")
-        }
 
-        switch (type) {
-          case 'admin':
-            navigate('/admin')
-            break
-          case 'kitchen':
-            navigate('/kitchen')
-            break
-          case 'cashier':
-            navigate('/cashier')
-            break
-          case 'menu':
-            navigate('/menu')
-            break
-        }
+        if (res.status === 200) {
+          login(type);
 
+          switch (type) {
+            case 'admin':
+              navigate('/admin');
+              break;
+            case 'kitchen':
+              navigate('/kitchen');
+              break;
+            case 'cashier':
+              navigate('/cashier');
+              break;
+            default:
+              setServerError("Unknown section!");
+          }
+        }
       } catch (error) {
-        setServerError("Server Error code: 500");
-        console.log(error)
+        // Enhanced error handling
+        if (error instanceof AxiosError) {
+          // Axios-specific error handling
+          const { response } = error;
+          if (response) {
+            const { status } = response;
+            if (status === 400) {
+              setServerError("Invalid Password!");
+            } else if (status === 404) {
+              setServerError("Email is Not Registered!");
+            } else if (status === 301) {
+              setServerError("You are not allowed to access this section!");
+            } else {
+              setServerError(`Server Error: ${status}`);
+            }
+          } else {
+            // Axios error with no response (e.g., network error)
+            setServerError("Network error occurred. Please check your connection.");
+          }
+        } else if (error instanceof Error) {
+          // Generic JS Error (non-Axios)
+          setServerError(error.message || "An unexpected error occurred.");
+        } else {
+          // Fallback for truly unknown errors
+          setServerError("An unknown error occurred. Please try again.");
+        }
+
+        console.error("Error details:", error);
       }
 
     }
 
     loginhandle();
-    // Check credentials based on user type
-    // const validCredentials = LOGIN_CREDENTIALS[type]
-    //
-    // if (email === validCredentials.email && password === validCredentials.password) {
-    //   // Successful login - navigate to corresponding dashboard
-    //   switch(type) {
-    //     case 'admin':
-    //       navigate('/admin')
-    //       break
-    //     case 'kitchen':
-    //       navigate('/kitchen')
-    //       break
-    //     case 'cashier':
-    //       navigate('/cashier')
-    //       break
-    //     case 'menu':
-    //       navigate('/menu')
-    //       break
-    //   }
-    //   setServerError(null)
-    // } else {
-    //   // Invalid credentials
-    //   setServerError("Invalid email or password. Please try again.")
-    // }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <Card className="w-full max-w-md bg-white/30 backdrop-filter backdrop-blur-md border border-gray-200 shadow-xl">
-        <CardHeader className="space-y-1">
+        <CardHeader className="space-y-1 items-center justify-center">
+          <img src='/Logo.png' alt="logo" className=" object-contain w-40 h-40" />
           <CardTitle className="text-2xl font-bold text-center pb-3 text-gray-800">TOS System - Login</CardTitle>
         </CardHeader>
         <CardContent>
@@ -151,7 +154,6 @@ export function MainLogin() {
                       <SelectContent>
                         <SelectItem value="kitchen">Kitchen</SelectItem>
                         <SelectItem value="cashier">Cashier</SelectItem>
-                        <SelectItem value="menu">Menu</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
@@ -179,7 +181,7 @@ export function MainLogin() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} className="w-full bg-white/50 border-gray-200" />
+                      <Input type="password" placeholder="•••••" {...field} className="w-full bg-white/50 border-gray-200" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -188,7 +190,7 @@ export function MainLogin() {
               {serverError && (
                 <div className="text-red-500 text-sm mt-2">{serverError}</div>
               )}
-              <Button type="submit" className="w-full bg-gray-800 hover:bg-gray-700 text-white transition-colors duration-200">
+              <Button type="submit" className="w-full bg-red-500 hover:bg-gray-700 text-white transition-colors duration-200">
                 Log In
               </Button>
             </form>

@@ -16,6 +16,7 @@ import menuItemRoute from './src/routes/menuItem';
 import orderRoute from './src/routes/order';
 import stockUpdateRoute from './src/routes/stockUpdate';
 import path from 'path';
+import { getAnalytics } from './src/handler/dbhandler';
 
 dotenv.config();
 connectDB();
@@ -68,8 +69,9 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage, user: payload) => {
 app.use('/auth', authRoute)
 app.use('/ingredients', ingredientsRoute)
 app.use('/menuitems', menuItemRoute)
-app.use('/orders', orderRoute)
+app.use('/orders', authMiddleware("cashier", "admin", "chef"), orderRoute)
 app.use('/stockupdate', stockUpdateRoute)
+app.get('/analytic', authMiddleware("admin"), getAnalytics)
 
 app.get('/ping', authMiddleware("admin"), (req: Request, res: Response) => {
   return res.status(200).json({ health: 1 })

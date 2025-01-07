@@ -1,35 +1,39 @@
 import NavSidebarLayout from '@/components/default/sidebarTemplate';
-import { Boxes, Package2, PackageCheck, PackageSearch, PackageX } from 'lucide-react';
+import { Package2, PackageCheck, PackagePlus, PackageSearch, PackageX } from 'lucide-react';
 
-function KitchenSidebar() {
+function CashierSidebar() {
   // Custom navigation items
   const myNavItems = [
     {
-      name: 'All Orders',
-      path: '/kitchen',
-      icon: Boxes
+      name: 'Add Order',
+      path: '/cashier',
+      icon: PackagePlus
     },
     {
       name: 'Pending Orders',
-      path: '/kitchen/pendingorders',
+      path: '/cashier/pendingorders',
       icon: PackageSearch
     },
     {
       name: 'Processing Orders',
-      path: '/kitchen/processingorders',
+      path: '/cashier/processingorders',
       icon: Package2
     },
     {
       name: 'Complete Orders',
-      path: '/kitchen/completeorders',
+      path: '/cashier/completeorders',
       icon: PackageCheck
     },
     {
       name: 'Cancel Orders',
-      path: '/kitchen/cancelorders',
+      path: '/cashier/cancelorders',
       icon: PackageX
     },
-
+    {
+      name: 'Orders History',
+      path: '/cashier/orderhistory',
+      icon: PackageX
+    },
   ];
 
   // Custom sidebar footer
@@ -54,4 +58,4 @@ function KitchenSidebar() {
   )
 }
 
-export default KitchenSidebar;
+export default CashierSidebar;

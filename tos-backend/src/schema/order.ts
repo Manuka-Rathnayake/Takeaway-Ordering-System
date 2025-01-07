@@ -26,7 +26,7 @@ export const AddOrderSchema = z.object({
   // totalPrice: z.number().positive("Total price must be positive"),
   discount: z.number().nonnegative("Discount cannot be negative").optional().default(0),
   menuItem: z.array(OrderMenuItemSchema).min(1, "At least one menu item is required"),
-  isPaid: z.boolean().default(false),
+  isPaid: z.boolean().default(true),
   paymentMethod: z.string().optional(),
   time: z.date().optional(),
   user: z.string().optional()

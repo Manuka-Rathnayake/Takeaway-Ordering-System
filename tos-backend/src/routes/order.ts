@@ -2,8 +2,6 @@ import { Router } from "express";
 import { addMenuItemToOrder, addOrder, deleteOrder, getAllOrders, getOrderById, getOrderStatusHandler, getPaidOrderHandler, getTodayOrderHandler, removeMenuItemFromOrder, updateOrder, updateOrderStatus } from "../handler/order";
 import { validateData } from "../middleware/schemaValidation";
 import { AddMenuItemToOrderSchema, AddOrderSchema, GetOrderByStatusSchema, RemoveMenuItemFromOrderSchema, UpdateOrderSchema, UpdateOrderStatusSchema } from "../schema/order";
-import { authMiddleware } from "../middleware/auth";
-import { addMenuItem } from "../handler/menuItem";
 
 const orderRoute = Router();
 
@@ -12,7 +10,6 @@ orderRoute.get('/paidorder', getPaidOrderHandler)
 orderRoute.get('/all', getAllOrders) // get all orders
 orderRoute.get('/:id', getOrderById) // get one order data
 orderRoute.post('/add',
-  authMiddleware("admin"),
   validateData(AddOrderSchema),
   addOrder
 ) // add one order data

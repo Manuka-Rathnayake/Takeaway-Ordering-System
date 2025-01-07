@@ -1,18 +1,18 @@
 import { IncomingMessage } from "http";
 import jwtparser from 'jsonwebtoken';
 
-type Roles = "user" | "admin" | "chef";
-type Sections = "cashier" | "kitchen" | "admin" | "menu";
+export type Roles = "cashier" | "admin" | "chef";
+export type Sections = "cashier" | "kitchen" | "admin" | "menu";
 
 type PermissionMap = {
   [Section in Sections]: Roles[];
 };
 
 const permission: PermissionMap = {
-  cashier: ["user", "admin"],
-  kitchen: ["chef"],
+  cashier: ["cashier", "admin"],
+  kitchen: ["chef", "admin"],
   admin: ["admin"],
-  menu: ["user", "admin"]
+  menu: ["cashier", "admin"]
 };
 
 export const RoleSectionCheck = (role: Roles, section: Sections): boolean => {

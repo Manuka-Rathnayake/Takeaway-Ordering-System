@@ -88,7 +88,7 @@ export interface IOrder {
   __v: number;
 }
 
-export interface WSSender {
-  msType: string;
-  payload: any;
+export interface WSSender<T> {
+  msgType: string;
+  payload: T;
 }

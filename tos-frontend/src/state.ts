@@ -188,7 +188,7 @@ type WebSocketStore = {
   socket: WebSocket | null;
   connect: (url: string) => void;
   disconnect: () => void;
-  sendMessage: (message: WSSender) => void;
+  sendMessage: (message: WSSender<object>) => void;
   lastNotification: INotifiData | null;
 };
 
@@ -280,7 +280,7 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
     set({ connectionStatus: 'disconnected', socket: null });
   },
 
-  sendMessage: (message: WSSender) => {
+  sendMessage: (message: WSSender<object>) => {
     const socket = get().socket;
     if (socket && socket.readyState === WebSocket.OPEN) {
 

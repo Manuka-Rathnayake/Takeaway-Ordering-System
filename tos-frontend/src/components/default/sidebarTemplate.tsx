@@ -1,10 +1,8 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   FaHome,
   FaSearch,
-  FaBell,
-  FaCog,
   FaBars,
   FaTimes
 } from 'react-icons/fa';
@@ -12,6 +10,10 @@ import axios from 'axios';
 import { create } from 'zustand';
 import { WebSocketManager } from '@/utils/ws';
 import NotificationDropdown from './notificationPanel';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { LogOut, User2 } from 'lucide-react';
+import { useAuth } from '@/utils/authcontext';
+import { Button } from '../ui/button';
 
 // Generic type for navigation items
 interface NavigationItem {
@@ -53,11 +55,17 @@ const NavSidebarLayout: React.FC<NavSidebarProps> = ({
   onSearchChange,
   notificationsEndpoint = '/api/notifications'
 }) => {
-  const { activeItem, setActiveItem, notifications, setNotifications } = useNavigationStore();
+  const { setActiveItem, setNotifications } = useNavigationStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login'); // Redirect to login page after logout
+  };
   // Default navigation items if none are provided
   const defaultNavItems: NavigationItem[] = [
     {
@@ -203,11 +211,19 @@ const NavSidebarLayout: React.FC<NavSidebarProps> = ({
             {/*     </span> */}
             {/*   )} */}
             {/* </div> */}
-            <img
-              src="https://via.placeholder.com/40"
-              alt="User Avatar"
-              className="w-10 h-10 rounded-full border border-gray-300 cursor-pointer"
-            />
+            {/* <img */}
+            {/*   src="https://via.placeholder.com/40" */}
+            {/*   alt="User Avatar" */}
+            {/*   className="w-10 h-10 rounded-full border border-gray-300 cursor-pointer" */}
+            {/* /> */}
+            <div>
+              <DropdownMenu>
+                <DropdownMenuTrigger><Button variant="outline" ><User2 /></Button></DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={handleLogout} > <LogOut /> Log Out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 

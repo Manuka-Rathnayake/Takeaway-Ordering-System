@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   FaHome,
   FaClipboardList,
@@ -7,8 +7,6 @@ import {
   FaHistory,
   FaShoppingBag,
   FaSearch,
-  FaBell,
-  FaCog,
   FaBars,
   FaTimes,
   FaLeaf
@@ -17,6 +15,10 @@ import axios from 'axios';
 import { create } from 'zustand';
 import NotificationDropdown from '@/components/default/notificationPanel';
 import { WebSocketManager } from '@/utils/ws';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { LogOut, User2 } from 'lucide-react';
+import { useAuth } from '@/utils/authcontext';
+import { Button } from '../button';
 
 interface NavigationItem {
   name: string;
@@ -39,11 +41,18 @@ const useNavigationStore = create<NavigationState>((set) => ({
 }));
 
 const AdminLayout: React.FC = () => {
-  const { activeItem, setActiveItem, notifications, setNotifications } = useNavigationStore();
+  const { setActiveItem, setNotifications } = useNavigationStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
 
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login'); // Redirect to login page after logout
+  };
   const navItems: NavigationItem[] = [
     {
       name: 'Dashboard',
@@ -114,8 +123,7 @@ const AdminLayout: React.FC = () => {
         `}
       >
         <div className="p-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Logo</h1>
-
+          <div><img src='/Logo.png' alt="logo" className="w-full h-full object-contain" /></div>
           {/* Mobile Close Button */}
           <button
             className="md:hidden"
@@ -147,20 +155,20 @@ const AdminLayout: React.FC = () => {
 
         <div className="mx-6 mt-8">
           <div className="bg-red-50 rounded-lg p-4">
-            <div className="flex flex-col items-center">
-              <img
-                src="/img1.png"
-                alt="Chef"
-                className="w-16 h-16 mb-2"
-              />
-              <p className="text-sm text-gray-600 text-center mb-4">
-                Please organize your menus through button below!
-              </p>
-              <button className="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center">
-                <span className="mr-2">+</span>
-                Add Menu
-              </button>
-            </div>
+            {/* <div className="flex flex-col items-center"> */}
+            {/*   <img */}
+            {/*     src="/img1.png" */}
+            {/*     alt="Chef" */}
+            {/*     className="w-16 h-16 mb-2" */}
+            {/*   /> */}
+            {/*   <p className="text-sm text-gray-600 text-center mb-4"> */}
+            {/*     Please organize your menus through button below! */}
+            {/*   </p> */}
+            {/*   // <button className="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center"> */}
+            {/*   //   <span className="mr-2">+</span> */}
+            {/*   //   Add Menu */}
+            {/*   // </button> */}
+            {/* </div> */}
           </div>
         </div>
       </div>
@@ -201,11 +209,17 @@ const AdminLayout: React.FC = () => {
               {/*   </span> */}
               {/* )} */}
             </div>
-            <img
-              src="https://via.placeholder.com/40"
-              alt="User Avatar"
-              className="w-10 h-10 rounded-full border border-gray-300 cursor-pointer"
-            />
+            {/* <img */}
+            {/*   src="https://via.placeholder.com/40" */}
+            {/*   alt="User Avatar" */}
+            {/*   className="w-10 h-10 rounded-full border border-gray-300 cursor-pointer" */}
+            {/* /> */}
+            <DropdownMenu>
+              <DropdownMenuTrigger><Button variant="outline" ><User2 /></Button></DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={handleLogout} > <LogOut /> Log Out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

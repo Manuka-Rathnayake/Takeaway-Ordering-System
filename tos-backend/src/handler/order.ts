@@ -95,7 +95,7 @@ export const getOrderById = async (req: Request, res: Response) => {
 }
 
 export const addOrder = async (req: Request, res: Response) => {
-  const session = null; // Remove session entirely
+  const session = null;
 
   try {
     const {
@@ -120,7 +120,10 @@ export const addOrder = async (req: Request, res: Response) => {
       return res.status(400).json({ msg: "Some menu items do not exist" });
     }
 
+    // Calculate total price only once
     let calculatedTotalPrice = 0;
+    const processedItems = new Map(); // Track processed items to avoid duplicates
+
     for (const item of menuItem) {
       const menuItemDetail = existingMenuItems.find(
         (menuItem) => menuItem.id.toString() === item.id
@@ -129,22 +132,26 @@ export const addOrder = async (req: Request, res: Response) => {
       if (!menuItemDetail) {
         return res.status(400).json({ msg: `Menu item with ID ${item.id} not found` });
       }
+
       // Add null checks and type conversion
       const itemPrice = menuItemDetail.price
         ? Number(menuItemDetail.price.toString() || '0')
         : 0;
-      const itemQuantityStr = item.quantity.toString()
-      const itemQuantity = Number(itemQuantityStr);
+      const itemQuantity = Number(item.quantity?.toString() || '0');
 
       // Validate price and quantity
       if (isNaN(itemPrice) || isNaN(itemQuantity)) {
         return res.status(400).json({
           msg: `Invalid price or quantity for menu item ${item.id}`,
-          details: { price: menuItemDetail.price, quantity: item.quntity }
+          details: { price: menuItemDetail.price, quantity: item.quantity }
         });
       }
 
-      calculatedTotalPrice += itemPrice * itemQuantity;
+      // Only add to total if this item hasn't been processed yet
+      if (!processedItems.has(item.id)) {
+        calculatedTotalPrice += itemPrice * itemQuantity;
+        processedItems.set(item.id, true);
+      }
     }
 
     const discountedPrice = calculatedTotalPrice - discount;
@@ -176,7 +183,6 @@ export const addOrder = async (req: Request, res: Response) => {
 
         stockUpdateOperations.push(stockUpdateOperation);
       }
-      break; // Process only the first menu item's ingredients
     }
 
     // Execute all stock updates
@@ -189,24 +195,25 @@ export const addOrder = async (req: Request, res: Response) => {
         msg: "Insufficient or concurrent modification of ingredient stock"
       });
     }
+
     // Create the order
     const newOrder = new Order({
       customerNumber,
       customerName,
       status,
-      statusKitchen: statusKitchen,
+      statusKitchen,
       addUser: user,
       price: Types.Decimal128.fromString(calculatedTotalPrice.toString()),
       totalPrice: Types.Decimal128.fromString(discountedPrice.toString()),
       discount: Types.Decimal128.fromString(discount.toString()),
       menuItem: menuItem.map((item: any) => ({
         id: new Types.ObjectId(item.id),
-        quntity: item.quntity
+        quantity: item.quantity // Fixed typo in 'quantity'
       })),
       payment: {
-        isPaid: isPaid,
-        paymentMethod: paymentMethod,
-        time: time,
+        isPaid,
+        paymentMethod,
+        time,
         user: new Types.ObjectId(isPaid ? user : undefined)
       }
     });
@@ -214,13 +221,13 @@ export const addOrder = async (req: Request, res: Response) => {
     // Save the order
     const createOrder = await newOrder.save();
 
-
     WSclient.broadcast(["kitchen", "admin", "cashier"], "notification", {
       level: "",
       topic: "New Order placed",
       msg: `${createOrder._id} placed!`
     });
-    WSclient.broadcast(["kitchen", "admin", "cashier"], "refresh-order", {})
+    WSclient.broadcast(["kitchen", "admin", "cashier"], "refresh-order", {});
+
     return res.status(201).json({
       msg: "Order created successfully!",
       data: newOrder
@@ -233,8 +240,7 @@ export const addOrder = async (req: Request, res: Response) => {
       error: error instanceof Error ? error.message : "Unknown error"
     });
   }
-}
-
+};
 
 export const updateOrder = async (req: Request, res: Response) => {
   try {

@@ -29,7 +29,7 @@ const formSchema = z.object({
   phonenumber: z.string(),
   password: z.string().min(6),
   confirmPassword: z.string(),
-  role: z.enum(['admin', 'cashier', 'customer']),
+  role: z.enum(['admin', 'cashier', 'chef']),
   nic: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",

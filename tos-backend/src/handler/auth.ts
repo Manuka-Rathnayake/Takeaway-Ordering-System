@@ -5,10 +5,10 @@ import bcrypt from "bcrypt";
 // import { handleMongooseError } from "../utils/ErrorHandle";
 import JsonWebToken from "jsonwebtoken";
 import { EditUserSchema, RegisterSchema } from "../schema/auth";
+import { Roles, RoleSectionCheck, Sections } from "../utils/roleauth";
 
 export const Register = async (req: Request<{}, {}, IUsers>, res: Response) => {
   try {
-
     const hashedpwd = await bcrypt.hash(req.body.password, 10);
 
     const newUser = new Users({
@@ -21,17 +21,16 @@ export const Register = async (req: Request<{}, {}, IUsers>, res: Response) => {
     });
 
     await newUser.save();
-    return res.status(201).json({ msg: `${req.body.email} is created!` })
+    return res.status(201).json({ msg: `${req.body.email} is created!` });
   } catch (e: any) {
     // if (e instanceof MongooseError || e.code === 11000) {
     //   const m_err = handleMongooseError(e)
     //   return res.status(400).json(m_err)
     // }
-    console.log(e)
-    return res.status(500).json({ msg: "Internal Server" })
-
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server" });
   }
-}
+};
 
 interface LoginReq {
   section: string;
@@ -41,47 +40,50 @@ interface LoginReq {
 
 export const Login = async (req: Request<{}, {}, LoginReq>, res: Response) => {
   try {
-    const { section, email, password } = req.body
+    const { section, email, password } = req.body;
 
     const user = await Users.findOne({ email: email });
     if (!user) {
-      return res.status(404).json({ msg: "This Email is Not Registed!!!" })
+      return res.status(404).json({ msg: "This Email is Not Registed!!!" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json("Invalid password !!!")
+      return res.status(400).json("Invalid password !!!");
+    }
+
+    const role: Roles = user.role as Roles
+    const sec: Sections = section as Sections
+    if (!RoleSectionCheck(role, sec)) {
+      return res.status(301).json("unauthorized route !!!");
     }
 
     const token = JsonWebToken.sign(
       {
         id: user._id,
         role: user.role,
-        section: section
+        section: section,
       },
-      (process.env.JWT_SECRET as string),
+      process.env.JWT_SECRET as string,
       {
-        expiresIn: "24h"
-      }
-    )
+        expiresIn: "24h",
+      },
+    );
 
-    res.cookie(
-      "tos_access",
-      token,
-      {
-        maxAge: 24 * 60 * 60 * 1000,
-
-      }
-    )
-    return res.status(200).json({ token: token })
-
+    res.cookie("tos_access", token, {
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    return res.status(200).json({ token: token });
   } catch (e) {
-    console.log(e)
-    return res.status(500).json({ msg: "Internal Server" })
+    console.log(e);
+    return res.status(500).json({ msg: "Internal Server" });
   }
-}
+};
 
-export const updateUser = async (req: Request<{ id: string }>, res: Response) => {
+export const updateUser = async (
+  req: Request<{ id: string }>,
+  res: Response,
+) => {
   try {
     // Validate the request body
     const validatedData = EditUserSchema.parse(req.body);
@@ -91,23 +93,32 @@ export const updateUser = async (req: Request<{ id: string }>, res: Response) =>
     //   validatedData.password = await bcrypt.hash(validatedData.password, 10);
     // }
 
-    const updatedUser = await Users.findByIdAndUpdate(req.params.id, validatedData, {
-      new: true, // Return the updated document
-      runValidators: true, // Run schema validation
-    });
+    const updatedUser = await Users.findByIdAndUpdate(
+      req.params.id,
+      validatedData,
+      {
+        new: true, // Return the updated document
+        runValidators: true, // Run schema validation
+      },
+    );
 
     if (!updatedUser) {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    return res.status(200).json({ msg: "User updated successfully", user: updatedUser });
+    return res
+      .status(200)
+      .json({ msg: "User updated successfully", user: updatedUser });
   } catch (e: any) {
     console.log(e);
     return res.status(400).json({ msg: e.message || "Invalid request" });
   }
 };
 
-export const deleteUser = async (req: Request<{ id: string }>, res: Response) => {
+export const deleteUser = async (
+  req: Request<{ id: string }>,
+  res: Response,
+) => {
   try {
     const deletedUser = await Users.findByIdAndDelete(req.params.id);
 
@@ -115,7 +126,9 @@ export const deleteUser = async (req: Request<{ id: string }>, res: Response) =>
       return res.status(404).json({ msg: "User not found" });
     }
 
-    return res.status(200).json({ msg: "User deleted successfully", user: deletedUser });
+    return res
+      .status(200)
+      .json({ msg: "User deleted successfully", user: deletedUser });
   } catch (e: any) {
     console.log(e);
     return res.status(500).json({ msg: "Internal Server Error" });
@@ -134,12 +147,20 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-//
-// try {
-//
-//   return res.status(201).json({ msg: `` })
-// } catch (e) {
-//   console.log(e)
-//   return res.status(500).json({ msg: "Internal Server" })
-//
-// }
+export const verifyAuth = async (req: Request, res: Response) => {
+  try {
+    const data = req.user;
+    res.status(200).json({
+      role: data.role,
+      section: data.section,
+    });
+  } catch (e: any) {
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
+
+export const logOut = async (req: Request, res: Response) => {
+  res.clearCookie('tos_access')
+  return res.json({ msg: "logout" })
+}
+
