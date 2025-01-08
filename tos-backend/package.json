@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test jest --testTimeout=5000",
+    "test": "npm run test:unit && npm run test:integration",
     "start": "npx tsc && node dist/index.js",
     "build": "tsc",
-    "serve": "node dist/index.js"
+    "serve": "node dist/index.js",
+    "test:unit": "jest --testPathPattern=__tests__/unit --silent",
+    "test:integration": "NODE_ENV=test jest --testPathPattern=__tests__/integration --runInBand"
   },
   "author": "",
   "license": "ISC",

@@ -30,6 +30,11 @@ const config: Config = {
   moduleFileExtensions: ["ts", "js", "json", "node"],
   clearMocks: true,
   setupFiles: ["<rootDir>/jest.setup.ts"], // Set up environment variables
+  collectCoverage: true,
+  coverageDirectory: "coverage",
+  coveragePathIgnorePatterns: ["/node_modules/"],
+
+  coverageReporters: ["text", "lcov"],
 };
 
 export default config;
